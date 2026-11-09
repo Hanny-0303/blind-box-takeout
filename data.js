@@ -456,3 +456,123 @@ const DISHES = [
   { id: 'sw10', name: '红豆沙', short: '红豆沙', cat: 'sweet', spice: 0, price: 12, emoji: '🫘', desc: '红豆煮到绵密，甜而不腻', flavor: '酸甜', protein: '素食', style: '凉食' },
 
 ];
+
+/* ==========================================================================
+   类型 / 菜系 / 饮品选项
+   type: staple 主食 / snack 小吃 / drink 饮品 / dish 菜系里的菜
+   sub: 主食/小吃/饮品的二级
+   cuisine: 菜系；小吃、饮品、部分主食可以为空
+   ========================================================================== */
+
+const TYPE_BY_CAT = {
+  bowl: ['staple', 'rice'],
+  friedrice: ['staple', 'rice'],
+  soupnoodle: ['staple', 'noodle'],
+  drynoodle: ['staple', 'noodle'],
+  ricenoodle: ['staple', 'fen'],
+  mixian: ['staple', 'mixian'],
+  dumpling: ['staple', 'dumpling'],
+  breakfast: ['staple', 'breakfast'],
+  burger: ['snack', 'burger'],
+  snack: ['snack', 'luwei'],
+  bbq: ['snack', 'bbq'],
+  light: ['snack', 'light'],
+  milktea: ['drink', 'milktea'],
+  sweet: ['drink', 'sweet'],
+};
+
+const CUISINE_BY_CAT = {
+  sichuan: '川湘',
+  malatang: '川湘',
+  hotpot: '川湘',
+  cantonese: '粤菜',
+  jiangzhe: '江浙',
+  xibei: '西北',
+  dongbei: '东北',
+  japanese: '日料',
+  korean: '韩餐',
+  sea: '东南亚',
+  pizza: '西餐',
+};
+
+/* 菜系分类里，实际属于饭/面/小吃的，单独指定 */
+const TYPE_OVERRIDES = {
+  // 粤菜
+  r9: ['staple', 'rice'], f5: ['staple', 'noodle'],
+  ct1: ['staple', 'rice'], ct2: ['staple', 'rice'], ct3: ['staple', 'rice'],
+  ct4: ['snack', null], ct5: ['staple', 'rice'], ct6: ['snack', null],
+  ct7: ['staple', 'breakfast'], ct8: ['staple', 'rice'],
+  // 江浙
+  jz1: ['staple', 'rice'], jz2: ['staple', 'rice'], jz3: ['staple', 'rice'],
+  jz4: ['staple', 'rice'], jz5: ['staple', 'rice'], jz6: ['staple', 'rice'],
+  jz7: ['staple', 'rice'], jz8: ['staple', 'rice'], jz9: ['staple', 'rice'],
+  jz10: ['staple', 'breakfast'],
+  // 西北
+  xb1: ['staple', 'breakfast'], xb2: ['staple', 'noodle'], xb3: ['staple', 'rice'],
+  xb4: ['staple', 'noodle'], xb5: ['staple', 'rice'], xb6: ['snack', null],
+  xb7: ['staple', 'rice'], xb8: ['staple', 'noodle'], xb9: ['staple', 'breakfast'],
+  xb10: ['snack', null],
+  // 东北
+  db1: ['staple', 'rice'], db2: ['staple', 'rice'], db3: ['staple', 'rice'],
+  db4: ['staple', 'rice'], db5: ['staple', 'rice'], db6: ['staple', 'rice'],
+  db7: ['staple', 'rice'], db8: ['snack', null], db9: ['snack', null], db10: ['staple', 'rice'],
+  // 日料
+  j1: ['staple', 'rice'], j2: ['snack', null], j3: ['staple', 'rice'],
+  j4: ['staple', 'noodle'], j5: ['dish', null], j6: ['staple', 'rice'],
+  jp1: ['staple', 'rice'], jp2: ['staple', 'rice'], jp3: ['staple', 'rice'], jp4: ['snack', null],
+  // 韩餐
+  r8: ['staple', 'rice'], kr1: ['dish', null], kr2: ['snack', null],
+  kr3: ['staple', 'noodle'], kr4: ['snack', null], kr5: ['snack', null],
+  kr6: ['staple', 'noodle'], kr7: ['snack', null], kr8: ['staple', 'rice'], kr9: ['dish', null],
+  // 东南亚
+  se1: ['dish', null], se2: ['staple', 'noodle'], se3: ['staple', 'noodle'],
+  se4: ['staple', 'rice'], se5: ['staple', 'rice'], se6: ['staple', 'rice'],
+  se7: ['staple', 'rice'], se8: ['snack', null], se9: ['staple', 'noodle'], se10: ['staple', 'rice'],
+  // 川湘：配饭菜
+  sc1: ['staple', 'rice'], sc2: ['staple', 'rice'], sc3: ['staple', 'rice'],
+  sc4: ['staple', 'rice'], sc5: ['staple', 'rice'], sc6: ['staple', 'rice'],
+  sc7: ['staple', 'rice'], sc8: ['staple', 'rice'], sc9: ['staple', 'rice'], sc10: ['staple', 'rice'],
+};
+
+/* 主食/小吃里，有明确菜系的 */
+const CUISINE_BY_ID = {
+  n2: '川湘', dn6: '川湘', r7: '川湘', r3: '川湘', bo1: '川湘',
+  f4: '川湘', f7: '川湘', rn2: '川湘',
+  n1: '西北', dn2: '西北',
+  n6: '日料', x4: '日料',
+  dn4: '韩餐',
+  r6: '江浙', n8: '江浙', f6: '江浙', bf7: '江浙', dp3: '江浙', dp4: '江浙',
+  bf4: '粤菜', rn3: '粤菜', r10: '粤菜',
+  m1: '其他', m2: '其他', m3: '其他', m4: '其他', m5: '其他', m6: '其他',
+};
+
+const DEFAULT_SUGAR = ['无糖', '三分', '五分', '七分', '全糖'];
+const DEFAULT_TEMP = ['冰', '常温', '热'];
+
+const DRINK_OVERRIDES = {
+  mk1: { sugar: ['无糖', '三分'], temp: ['冰', '热'] },
+  mk4: { sugar: ['无糖'], temp: ['冰', '常温'] },
+  mk5: { sugar: ['无糖'], temp: ['冰'] },
+  mk7: { sugar: ['无糖', '三分'], temp: ['冰', '热'] },
+  mk10: { temp: ['热'] },
+  sw5: { temp: ['冰'] },
+  ds5: { temp: ['常温'] },
+};
+
+DISHES.forEach((dish) => {
+  const base = TYPE_BY_CAT[dish.cat] || ['dish', null];
+  const typeInfo = TYPE_OVERRIDES[dish.id] || base;
+  dish.type = typeInfo[0];
+  dish.sub = typeInfo[1];
+  dish.cuisine = CUISINE_BY_ID[dish.id] || CUISINE_BY_CAT[dish.cat] || null;
+
+  if (dish.type === 'drink') {
+    const opt = DRINK_OVERRIDES[dish.id] || {};
+    dish.sugar = opt.sugar || DEFAULT_SUGAR;
+    dish.temp = opt.temp || DEFAULT_TEMP;
+  } else {
+    dish.sugar = null;
+    dish.temp = null;
+  }
+});
+

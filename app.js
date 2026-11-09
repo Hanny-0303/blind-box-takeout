@@ -48,13 +48,28 @@
 
   const CAT_MAP = Object.fromEntries(CATEGORIES.map((c) => [c.id, c]));
   const DISH_MAP = Object.fromEntries(DISHES.map((d) => [d.id, d]));
-  const TREE_MAP = Object.fromEntries(CATEGORY_TREE.map((g) => [g.id, g]));
-  const SUBCAT_MAP = {};
-  const GROUP_CATS = {};
-  CATEGORY_TREE.forEach((g) => {
-    GROUP_CATS[g.id] = g.children.flatMap((c) => c.cats);
-    g.children.forEach((c) => { SUBCAT_MAP[c.id] = { ...c, group: g.id }; });
-  });
+  const CUISINE_OPTIONS = ['川湘', '粤菜', '江浙', '西北', '东北', '日料', '韩餐', '东南亚', '西餐'];
+  const STAPLE_OPTIONS = [
+    { id: 'rice', name: '饭' },
+    { id: 'noodle', name: '面' },
+    { id: 'fen', name: '粉' },
+    { id: 'mixian', name: '米线' },
+    { id: 'dumpling', name: '饺子' },
+    { id: 'breakfast', name: '早餐' },
+  ];
+  const SNACK_OPTIONS = [
+    { id: 'burger', name: '炸鸡汉堡' },
+    { id: 'luwei', name: '卤味' },
+    { id: 'bbq', name: '烧烤' },
+    { id: 'light', name: '轻食' },
+  ];
+  const DRINK_OPTIONS = [
+    { id: 'milktea', name: '奶茶咖啡' },
+    { id: 'sweet', name: '甜品糖水' },
+  ];
+  const STAPLE_NAME = Object.fromEntries(STAPLE_OPTIONS.map((o) => [o.id, o.name]));
+  const SNACK_NAME = Object.fromEntries(SNACK_OPTIONS.map((o) => [o.id, o.name]));
+  const DRINK_NAME = Object.fromEntries(DRINK_OPTIONS.map((o) => [o.id, o.name]));
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   /* ------------------------------------------------------------------ */
@@ -64,9 +79,14 @@
   let history = loadHistory();
 
   const filters = {
+    mode: 'cuisine',
+    cuisine: 'any',
+    staple: 'any',
+    snack: 'any',
+    drink: 'any',
+    sugar: 'any',
+    temp: 'any',
     spice: 'any',
-    cat: 'any',
-    sub: 'any',
     flavor: 'any',
     protein: 'any',
     style: 'any',
@@ -97,9 +117,11 @@
   const shuffleBtn = $('#shuffleWheel');
   const wheelSlot = $('#wheelResult');
   const filterSlot = $('#filterResult');
-  const subcatPanel = $('#subcatPanel');
-  const subcatChips = $('#subcatChips');
-  const subcatLabel = $('#subcatLabel');
+  const modeGrid = $('#modeGrid');
+  const cuisineChips = $('#cuisineChips');
+  const stapleChips = $('#stapleChips');
+  const snackChips = $('#snackChips');
+  const drinkChips = $('#drinkChips');
   const pickBtn = $('#pickBtn');
   const tabs = $('#tabs');
   const sheet = $('#profileSheet');
@@ -415,17 +437,27 @@
     return 1 + catN * 0.55 + dishN * 1.15;
   }
 
-  function pickDish({ spice, cat, sub, flavor, protein, style, fresh, min, max, excludeId }) {
-    const spiceMax = spice === 'any' ? 3 : Number(spice);
+  function pickDish({ mode, cuisine, staple, snack, drink, sugar, temp, flavor, spice, protein, style, fresh, min, max, excludeId }) {
     let pool = DISHES.filter((d) => {
-      if (d.spice > spiceMax) return false;
-      if (cat !== 'any') {
-        const allowed = sub !== 'any' && SUBCAT_MAP[sub] ? SUBCAT_MAP[sub].cats : GROUP_CATS[cat];
-        if (!allowed || !allowed.includes(d.cat)) return false;
+      if (mode === 'cuisine') {
+        if (d.type !== 'staple' && d.type !== 'dish') return false;
+        if (cuisine !== 'any' && d.cuisine !== cuisine) return false;
+        if (staple !== 'any' && (d.type !== 'staple' || d.sub !== staple)) return false;
+        if (flavor !== 'any' && d.flavor !== flavor) return false;
+        if (spice !== 'any' && d.spice !== Number(spice)) return false;
+        if (protein !== 'any' && d.protein !== protein) return false;
+        if (style !== 'any' && d.style !== style) return false;
+      } else if (mode === 'snack') {
+        if (d.type !== 'snack') return false;
+        if (snack !== 'any' && d.sub !== snack) return false;
+        if (flavor !== 'any' && d.flavor !== flavor) return false;
+        if (spice !== 'any' && d.spice !== Number(spice)) return false;
+      } else if (mode === 'drink') {
+        if (d.type !== 'drink') return false;
+        if (drink !== 'any' && d.sub !== drink) return false;
+        if (sugar !== 'any' && !(d.sugar || []).includes(sugar)) return false;
+        if (temp !== 'any' && !(d.temp || []).includes(temp)) return false;
       }
-      if (flavor !== 'any' && d.flavor !== flavor) return false;
-      if (protein !== 'any' && d.protein !== protein) return false;
-      if (style !== 'any' && d.style !== style) return false;
       if (d.price < min || d.price > max) return false;
       return true;
     });
@@ -546,14 +578,21 @@
   function pickForMe(isReroll) {
     const prev = results.filter;
     const wasRevealed = Boolean(prev.revealed);
+    const mode = filters.mode;
+    const fresh = mode === 'cuisine' || mode === 'any' ? filters.fresh : 'any';
     const dish = pickDish({
-      spice: filters.spice,
-      cat: filters.cat,
-      sub: filters.sub,
-      flavor: filters.flavor,
-      protein: filters.protein,
-      style: filters.style,
-      fresh: filters.fresh,
+      mode,
+      cuisine: filters.cuisine,
+      staple: filters.staple,
+      snack: filters.snack,
+      drink: filters.drink,
+      sugar: filters.sugar,
+      temp: filters.temp,
+      flavor: mode === 'cuisine' || mode === 'snack' ? filters.flavor : 'any',
+      spice: mode === 'cuisine' || mode === 'snack' ? filters.spice : 'any',
+      protein: mode === 'cuisine' ? filters.protein : 'any',
+      style: mode === 'cuisine' ? filters.style : 'any',
+      fresh,
       min: filters.min,
       max: filters.max,
       excludeId: isReroll && prev.dish ? prev.dish.id : null,
@@ -570,7 +609,7 @@
     results.filter = { dish, accepted: false, revealed: wasRevealed, store: null };
 
     if (wasRevealed) {
-      renderResult('filter', dish, filters.fresh);
+      renderResult('filter', dish, fresh);
     } else {
       sealedCount = isReroll ? sealedCount + 1 : 1;
       renderSealed();
@@ -616,15 +655,25 @@
 
   function activeFilterBits() {
     const bits = [];
-    if (filters.spice !== 'any') bits.push(SPICE_LABELS[Number(filters.spice)]);
-    if (filters.cat !== 'any' && TREE_MAP[filters.cat]) {
-      let label = TREE_MAP[filters.cat].name;
-      if (filters.sub !== 'any' && SUBCAT_MAP[filters.sub]) label += ` · ${SUBCAT_MAP[filters.sub].name}`;
-      bits.push(label);
+    if (filters.mode === 'cuisine') {
+      if (filters.cuisine !== 'any') bits.push(`菜系 · ${filters.cuisine}`);
+      if (filters.staple !== 'any') bits.push(`主食 · ${STAPLE_NAME[filters.staple]}`);
+      if (filters.flavor !== 'any') bits.push(filters.flavor);
+      if (filters.spice !== 'any') bits.push(SPICE_LABELS[Number(filters.spice)]);
+      if (filters.protein !== 'any') bits.push(filters.protein);
+      if (filters.style !== 'any') bits.push(filters.style);
+      if (filters.fresh !== 'any') bits.push(filters.fresh === 'new' ? '尝鲜' : '念旧');
+    } else if (filters.mode === 'snack') {
+      if (filters.snack !== 'any') bits.push(`小吃 · ${SNACK_NAME[filters.snack]}`);
+      if (filters.flavor !== 'any') bits.push(filters.flavor);
+      if (filters.spice !== 'any') bits.push(SPICE_LABELS[Number(filters.spice)]);
+    } else if (filters.mode === 'drink') {
+      if (filters.drink !== 'any') bits.push(`饮品 · ${DRINK_NAME[filters.drink]}`);
+      if (filters.sugar !== 'any') bits.push(`甜度 ${filters.sugar}`);
+      if (filters.temp !== 'any') bits.push(`温度 ${filters.temp}`);
+    } else if (filters.mode === 'any' && filters.fresh !== 'any') {
+      bits.push(filters.fresh === 'new' ? '尝鲜' : '念旧');
     }
-    if (filters.flavor !== 'any') bits.push(filters.flavor);
-    if (filters.protein !== 'any') bits.push(filters.protein);
-    if (filters.style !== 'any') bits.push(filters.style);
     if (filters.price !== 'any') bits.push(`¥${filters.min}–${filters.max}`);
     return bits;
   }
@@ -632,8 +681,8 @@
   function renderSealed() {
     const bits = activeFilterBits();
     const desc = bits.length
-      ? `按你选的 ${bits.length} 个条件，从 ${DISHES.length} 道菜里挑了一个。`
-      : `所有条件都随便，从 ${DISHES.length} 道菜里挑了一个。`;
+      ? `按你选的 ${bits.length} 个条件，挑好了一个。`
+      : '所有条件都随便，挑好了一个。';
 
     const sealedTitle = sealedCount > 1 ? `第 ${sealedCount} 个盲盒已就绪` : '盲盒已就绪';
     filterSlot.innerHTML = `
@@ -660,7 +709,8 @@
     const res = results.filter;
     if (!res.dish || res.revealed) return;
     res.revealed = true;
-    renderResult('filter', res.dish, filters.fresh);
+    const fresh = filters.mode === 'cuisine' || filters.mode === 'any' ? filters.fresh : 'any';
+    renderResult('filter', res.dish, fresh);
   }
 
   function renderResult(kind, dish, mode, reasonOverride) {
@@ -681,7 +731,7 @@
             <p class="dish-desc">${dish.desc}</p>
             <div class="dish-meta">
               <span class="pill">${cat.emoji} ${cat.name}</span>
-              <span class="pill">${SPICE_LABELS[dish.spice]}</span>
+              ${dish.type === 'drink' ? '' : `<span class="pill">${SPICE_LABELS[dish.spice]}</span>`}
               <span class="pill">${dish.flavor}</span>
               <span class="pill">¥${dish.price}</span>
               ${freshPill}
@@ -714,11 +764,17 @@
   }
 
   function renderEmpty() {
+    const hints = {
+      cuisine: '把菜系、主食、口味、辣度或价格放宽一点，选择会多很多。',
+      snack: '把小吃类型、口味、辣度或价格放宽一点，选择会多很多。',
+      drink: '把甜度、温度或价格放宽一点，选择会多很多。',
+      any: '把价格或新鲜度放宽一点，选择会多很多。',
+    };
     filterSlot.innerHTML = `
       <article class="empty-card">
         <div class="empty-emoji" aria-hidden="true">🫥</div>
         <p class="empty-title">这个组合太刁钻了</p>
-        <p class="empty-desc">口味和辣度可能冲突了，把分类、价格、口味或辣度放宽一点，选择会多很多。</p>
+        <p class="empty-desc">${hints[filters.mode] || hints.cuisine}</p>
         <button type="button" class="btn btn-small" data-act="reset">重置条件</button>
       </article>`;
     syncFilterDock();
@@ -872,6 +928,8 @@
 
     closeSheet();
     setActiveTab('filter');
+    const targetMode = dish.type === 'drink' ? 'drink' : dish.type === 'snack' ? 'snack' : 'cuisine';
+    setMode(targetMode);
     results.filter = { dish, accepted: false, revealed: true, store: entry.store || null };
     sealedCount = 0;
     const reason = entry.store
@@ -1019,32 +1077,100 @@
     }
   }
 
-  function countCats(cats) {
-    return DISHES.reduce((n, d) => n + (cats.includes(d.cat) ? 1 : 0), 0);
+  function countDishes(fn) {
+    return DISHES.filter(fn).length;
   }
 
-  function renderSubcats(groupId) {
-    const group = TREE_MAP[groupId];
-    if (!group) {
-      subcatPanel.hidden = true;
-      subcatChips.innerHTML = '';
-      return;
-    }
+  function isCuisineDish(d) {
+    return d.type === 'staple' || d.type === 'dish';
+  }
 
-    const total = countCats(GROUP_CATS[groupId]);
+  function renderOptionChips(container, options, current, total, countFn) {
     const buttons = [
-      `<button type="button" class="chip" data-sub="any" aria-pressed="true">随便<span class="chip-count">${total}</span></button>`,
+      `<button type="button" class="chip" data-value="any" aria-pressed="${current === 'any'}">随便<span class="chip-count">${total}</span></button>`,
     ];
-    group.children.forEach((child) => {
-      const n = countCats(child.cats);
+    options.forEach((opt) => {
       buttons.push(
-        `<button type="button" class="chip" data-sub="${child.id}" aria-pressed="false">${child.name}<span class="chip-count">${n}</span></button>`
+        `<button type="button" class="chip" data-value="${opt.id}" aria-pressed="${current === opt.id}">${opt.name}<span class="chip-count">${countFn(opt.id)}</span></button>`
       );
     });
+    container.innerHTML = buttons.join('');
+  }
 
-    subcatChips.innerHTML = buttons.join('');
-    subcatLabel.textContent = group.name;
-    subcatPanel.hidden = false;
+  function renderAllOptionChips() {
+    renderOptionChips(
+      cuisineChips,
+      CUISINE_OPTIONS.map((name) => ({ id: name, name })),
+      filters.cuisine,
+      countDishes(isCuisineDish),
+      (id) => countDishes((d) => isCuisineDish(d) && d.cuisine === id)
+    );
+    renderOptionChips(
+      stapleChips,
+      STAPLE_OPTIONS,
+      filters.staple,
+      countDishes((d) => d.type === 'staple'),
+      (id) => countDishes((d) => d.type === 'staple' && d.sub === id)
+    );
+    renderOptionChips(
+      snackChips,
+      SNACK_OPTIONS,
+      filters.snack,
+      countDishes((d) => d.type === 'snack'),
+      (id) => countDishes((d) => d.type === 'snack' && d.sub === id)
+    );
+    renderOptionChips(
+      drinkChips,
+      DRINK_OPTIONS,
+      filters.drink,
+      countDishes((d) => d.type === 'drink'),
+      (id) => countDishes((d) => d.type === 'drink' && d.sub === id)
+    );
+  }
+
+  function syncStaticChips() {
+    $$('.chips[data-group]').forEach((group) => {
+      const key = group.dataset.group;
+      const value = String(filters[key]);
+      $$('.chip', group).forEach((c) => c.setAttribute('aria-pressed', String(c.dataset.value === value)));
+    });
+  }
+
+  function updateModeUI() {
+    $$('.mode-card').forEach((card) => {
+      card.setAttribute('aria-pressed', String(card.dataset.mode === filters.mode));
+    });
+    $$('[data-modes]').forEach((el) => {
+      el.hidden = !el.dataset.modes.split(' ').includes(filters.mode);
+    });
+  }
+
+  function setMode(mode) {
+    filters.mode = mode;
+    if (mode !== 'cuisine') {
+      filters.cuisine = 'any';
+      filters.staple = 'any';
+    }
+    if (mode !== 'snack') filters.snack = 'any';
+    if (mode !== 'drink') {
+      filters.drink = 'any';
+      filters.sugar = 'any';
+      filters.temp = 'any';
+    }
+    if (mode !== 'cuisine' && mode !== 'snack') {
+      filters.flavor = 'any';
+      filters.spice = 'any';
+    }
+    if (mode !== 'cuisine') {
+      filters.protein = 'any';
+      filters.style = 'any';
+    }
+    if (mode !== 'cuisine' && mode !== 'any') filters.fresh = 'any';
+
+    renderAllOptionChips();
+    syncStaticChips();
+    updateModeUI();
+    clearFilterResult();
   }
 
   function bindFilters() {
@@ -1055,11 +1181,7 @@
         const key = group.dataset.group;
         $$('.chip', group).forEach((c) => c.setAttribute('aria-pressed', String(c === chip)));
 
-        if (key === 'cat') {
-          filters.cat = chip.dataset.value;
-          filters.sub = 'any';
-          renderSubcats(filters.cat);
-        } else if (key === 'price') {
+        if (key === 'price') {
           const value = chip.dataset.value;
           if (value === 'custom') {
             customPrice.hidden = false;
@@ -1079,6 +1201,22 @@
       });
     });
 
+    $$('[data-filter]').forEach((container) => {
+      container.addEventListener('click', (e) => {
+        const chip = e.target.closest('.chip');
+        if (!chip) return;
+        filters[container.dataset.filter] = chip.dataset.value;
+        $$('.chip', container).forEach((c) => c.setAttribute('aria-pressed', String(c === chip)));
+        clearFilterResult();
+      });
+    });
+
+    $$('.mode-card').forEach((card) => {
+      card.addEventListener('click', () => {
+        if (card.dataset.mode !== filters.mode) setMode(card.dataset.mode);
+      });
+    });
+
     const onCustomInput = () => {
       if (filters.price === 'custom') {
         readCustomPrice();
@@ -1087,14 +1225,6 @@
     };
     priceMinInput.addEventListener('change', onCustomInput);
     priceMaxInput.addEventListener('change', onCustomInput);
-
-    subcatChips.addEventListener('click', (e) => {
-      const chip = e.target.closest('.chip');
-      if (!chip) return;
-      filters.sub = chip.dataset.sub;
-      $$('.chip', subcatChips).forEach((c) => c.setAttribute('aria-pressed', String(c === chip)));
-      clearFilterResult();
-    });
 
     pickBtn.addEventListener('click', () => pickForMe(false));
 
@@ -1139,9 +1269,13 @@
   }
 
   function resetFilters() {
+    filters.cuisine = 'any';
+    filters.staple = 'any';
+    filters.snack = 'any';
+    filters.drink = 'any';
+    filters.sugar = 'any';
+    filters.temp = 'any';
     filters.spice = 'any';
-    filters.cat = 'any';
-    filters.sub = 'any';
     filters.flavor = 'any';
     filters.protein = 'any';
     filters.style = 'any';
@@ -1150,14 +1284,11 @@
     filters.min = 0;
     filters.max = 1000;
 
-    $$('.chips').forEach((group) => {
-      $$('.chip', group).forEach((c) => c.setAttribute('aria-pressed', String(c.dataset.value === 'any')));
-    });
     customPrice.hidden = true;
     priceMinInput.value = '0';
     priceMaxInput.value = '1000';
-    subcatPanel.hidden = true;
-    subcatChips.innerHTML = '';
+    renderAllOptionChips();
+    syncStaticChips();
     clearFilterResult();
     toast('条件已重置');
   }
@@ -1196,6 +1327,9 @@
     bindWheel();
     bindFilters();
     bindSheet();
+    renderAllOptionChips();
+    syncStaticChips();
+    updateModeUI();
     drawWheel();
     if (document.fonts && document.fonts.ready) {
       document.fonts.ready.then(() => drawWheel()).catch(() => {});

@@ -4,13 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>盲盒外卖 · 今天吃什么</title>
-  <meta name="description" content="选择困难症救星：4 个大类、25 个细分分类、264 道菜；转盘或条件筛选，随机决定今天吃什么。" />
+  <meta name="description" content="选择困难症救星：菜系、小吃、饮品、随便四种模式，264 道菜，随机决定今天吃什么。" />
   <meta name="theme-color" content="#FFF6E9" />
   <meta name="color-scheme" content="light" />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="盲盒外卖" />
   <meta property="og:title" content="盲盒外卖 · 今天吃什么" />
-  <meta property="og:description" content="4 个大类、25 个细分分类、264 道菜；转盘 + 精准盲盒，随机决定今天吃什么。纯前端，打开就能用。" />
+  <meta property="og:description" content="菜系、小吃、饮品、随便四种模式，264 道菜；转盘 + 精准盲盒，随机决定今天吃什么。纯前端，打开就能用。" />
   <meta property="og:url" content="https://hanny-0303.github.io/blind-box-takeout/" />
   <meta property="og:image" content="https://hanny-0303.github.io/blind-box-takeout/docs/og-cover.jpg" />
   <meta property="og:image:width" content="1200" />
@@ -73,34 +73,99 @@
 
       <!-- ================= 精准盲盒 ================= -->
       <section class="panel" id="panel-filter" role="tabpanel" aria-labelledby="tab-filter" hidden>
-        <p class="panel-lead">7 个条件，从 25 个细分分类、264 道菜里开盲盒。</p>
+        <p class="panel-lead">先选一个模式，下面只出现相关的条件。</p>
 
-        <div class="filter-block">
-          <div class="field-head">
-            <span class="idx">01</span>
-            <span class="field-title">分类</span>
-            <span class="field-note">先选大类，再选小类</span>
-          </div>
-          <div class="chips" data-group="cat" id="catChips" role="group" aria-label="分类">
-            <button type="button" class="chip" data-value="any" aria-pressed="true">随便</button>
-            <button type="button" class="chip" data-value="cuisine" aria-pressed="false">🍣 菜系</button>
-            <button type="button" class="chip" data-value="staple" aria-pressed="false">🍚 主食</button>
-            <button type="button" class="chip" data-value="snack" aria-pressed="false">🍢 小吃</button>
-            <button type="button" class="chip" data-value="drink" aria-pressed="false">🧋 饮品</button>
-          </div>
+        <div class="mode-grid" id="modeGrid" role="tablist" aria-label="吃什么模式">
+          <button type="button" class="mode-card" data-mode="cuisine" aria-pressed="true">
+            <span class="mode-emoji" aria-hidden="true">🍣</span>
+            <span class="mode-name">菜系</span>
+            <span class="mode-desc">川湘 · 粤菜 · 日料</span>
+          </button>
+          <button type="button" class="mode-card" data-mode="snack" aria-pressed="false">
+            <span class="mode-emoji" aria-hidden="true">🍢</span>
+            <span class="mode-name">小吃</span>
+            <span class="mode-desc">炸鸡 · 卤味 · 烧烤</span>
+          </button>
+          <button type="button" class="mode-card" data-mode="drink" aria-pressed="false">
+            <span class="mode-emoji" aria-hidden="true">🧋</span>
+            <span class="mode-name">饮品</span>
+            <span class="mode-desc">奶茶 · 咖啡 · 甜品</span>
+          </button>
+          <button type="button" class="mode-card" data-mode="any" aria-pressed="false">
+            <span class="mode-emoji" aria-hidden="true">🎲</span>
+            <span class="mode-name">随便</span>
+            <span class="mode-desc">都行，直接摇</span>
+          </button>
+        </div>
 
-          <div class="subcat-panel" id="subcatPanel" hidden>
-            <div class="subcat-head">
-              <span class="subcat-title" id="subcatLabel">菜系</span>
-              <span class="subcat-hint">不选就是整个大类</span>
+        <div class="mode-panel" id="cuisinePanel" data-modes="cuisine">
+          <div class="filter-block">
+            <div class="field-head">
+              <span class="field-title">菜系</span>
+              <span class="field-note">不选就是全部</span>
             </div>
-            <div class="chips" id="subcatChips" role="group" aria-label="二级分类"></div>
+            <div class="chips" id="cuisineChips" data-filter="cuisine" role="group" aria-label="菜系"></div>
+          </div>
+
+          <div class="filter-block">
+            <div class="field-head">
+              <span class="field-title">主食</span>
+              <span class="field-note">配饭还是面</span>
+            </div>
+            <div class="chips" id="stapleChips" data-filter="staple" role="group" aria-label="主食"></div>
           </div>
         </div>
 
-        <div class="filter-block">
+        <div class="mode-panel" id="snackPanel" data-modes="snack" hidden>
+          <div class="filter-block">
+            <div class="field-head">
+              <span class="field-title">小吃</span>
+              <span class="field-note">不用管菜系</span>
+            </div>
+            <div class="chips" id="snackChips" data-filter="snack" role="group" aria-label="小吃"></div>
+          </div>
+        </div>
+
+        <div class="mode-panel" id="drinkPanel" data-modes="drink" hidden>
+          <div class="filter-block">
+            <div class="field-head">
+              <span class="field-title">饮品</span>
+              <span class="field-note">不用管菜系</span>
+            </div>
+            <div class="chips" id="drinkChips" data-filter="drink" role="group" aria-label="饮品"></div>
+          </div>
+
+          <div class="filter-block">
+            <div class="field-head">
+              <span class="field-title">甜度</span>
+              <span class="field-note">可选</span>
+            </div>
+            <div class="chips" data-group="sugar" role="group" aria-label="甜度">
+              <button type="button" class="chip" data-value="any" aria-pressed="true">随便</button>
+              <button type="button" class="chip" data-value="无糖" aria-pressed="false">无糖</button>
+              <button type="button" class="chip" data-value="三分" aria-pressed="false">三分</button>
+              <button type="button" class="chip" data-value="五分" aria-pressed="false">五分</button>
+              <button type="button" class="chip" data-value="七分" aria-pressed="false">七分</button>
+              <button type="button" class="chip" data-value="全糖" aria-pressed="false">全糖</button>
+            </div>
+          </div>
+
+          <div class="filter-block">
+            <div class="field-head">
+              <span class="field-title">温度</span>
+              <span class="field-note">可选</span>
+            </div>
+            <div class="chips" data-group="temp" role="group" aria-label="温度">
+              <button type="button" class="chip" data-value="any" aria-pressed="true">随便</button>
+              <button type="button" class="chip" data-value="冰" aria-pressed="false">冰</button>
+              <button type="button" class="chip" data-value="常温" aria-pressed="false">常温</button>
+              <button type="button" class="chip" data-value="热" aria-pressed="false">热</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="filter-block" data-modes="cuisine snack">
           <div class="field-head">
-            <span class="idx">02</span>
             <span class="field-title">口味</span>
             <span class="field-note">想吃哪种味道</span>
           </div>
@@ -116,11 +181,10 @@
           </div>
         </div>
 
-        <div class="filter-block">
+        <div class="filter-block" data-modes="cuisine snack">
           <div class="field-head">
-            <span class="idx">03</span>
             <span class="field-title">辣度</span>
-            <span class="field-note">能接受的上限</span>
+            <span class="field-note">精确等级</span>
           </div>
           <div class="chips" data-group="spice" role="group" aria-label="辣度">
             <button type="button" class="chip" data-value="any" aria-pressed="true">随便</button>
@@ -131,9 +195,8 @@
           </div>
         </div>
 
-        <div class="filter-block">
+        <div class="filter-block" data-modes="cuisine">
           <div class="field-head">
-            <span class="idx">04</span>
             <span class="field-title">主要食材</span>
             <span class="field-note">今天想吃什么肉</span>
           </div>
@@ -147,9 +210,8 @@
           </div>
         </div>
 
-        <div class="filter-block">
+        <div class="filter-block" data-modes="cuisine">
           <div class="field-head">
-            <span class="idx">05</span>
             <span class="field-title">做法</span>
             <span class="field-note">带汤还是干香</span>
           </div>
@@ -164,9 +226,8 @@
           </div>
         </div>
 
-        <div class="filter-block">
+        <div class="filter-block" data-modes="cuisine any">
           <div class="field-head">
-            <span class="idx">06</span>
             <span class="field-title">新鲜度</span>
             <span class="field-note">按你的点单记录</span>
           </div>
@@ -183,7 +244,6 @@
 
         <div class="filter-block">
           <div class="field-head">
-            <span class="idx">07</span>
             <span class="field-title">价格区间</span>
           </div>
           <div class="chips" data-group="price" role="group" aria-label="价格区间">
