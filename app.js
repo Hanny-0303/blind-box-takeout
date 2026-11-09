@@ -48,6 +48,9 @@
 
   const CAT_MAP = Object.fromEntries(CATEGORIES.map((c) => [c.id, c]));
   const DISH_MAP = Object.fromEntries(DISHES.map((d) => [d.id, d]));
+  const GROUP_MAP = Object.fromEntries(CATEGORY_GROUPS.map((g) => [g.id, g]));
+  const GROUP_BY_CAT = {};
+  CATEGORY_GROUPS.forEach((g) => g.cats.forEach((catId) => { GROUP_BY_CAT[catId] = g.id; }));
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   /* ------------------------------------------------------------------ */
@@ -69,9 +72,11 @@
   };
 
   const results = {
-    wheel: { dish: null, accepted: false, revealed: true },
-    filter: { dish: null, accepted: false, revealed: false },
+    wheel: { dish: null, accepted: false, revealed: true, store: null },
+    filter: { dish: null, accepted: false, revealed: false, store: null },
   };
+
+  let sealedCount = 0;
 
   const wheelState = {
     items: [],
@@ -155,8 +160,14 @@
     }
   }
 
-  function recordDish(dish) {
-    history.push({ id: dish.id, ts: Date.now() });
+  function recordDish(dish, store) {
+    history.push({
+      id: dish.id,
+      ts: Date.now(),
+      store: store
+        ? { key: store.key, platform: store.platform, brand: store.brand, rating: store.rating }
+        : null,
+    });
     history = history.slice(-MAX_HISTORY);
     saveHistory();
   }
@@ -318,7 +329,7 @@
     if (wheelState.spinning || !wheelState.items.length) return;
 
     wheelState.spinning = true;
-    results.wheel = { dish: null, accepted: false };
+    results.wheel = { dish: null, accepted: false, revealed: true, store: null };
     spinBtn.disabled = true;
     spinBtn.classList.add('spinning');
     spinLabel.textContent = '转…';
@@ -375,7 +386,7 @@
     if (wheelState.spinning) return;
     wheelState.items = buildWheelItems();
     wheelState.rot = 0;
-    results.wheel = { dish: null, accepted: false };
+    results.wheel = { dish: null, accepted: false, revealed: true, store: null };
     wheelSlot.innerHTML = '';
     drawWheel();
     toast('换了一批新候选 🍽️');
@@ -398,9 +409,9 @@
 
   function pickDish({ spice, cat, flavor, protein, style, fresh, min, max, excludeId }) {
     const spiceMax = spice === 'any' ? 3 : Number(spice);
-    const pool = DISHES.filter((d) => {
+    let pool = DISHES.filter((d) => {
       if (d.spice > spiceMax) return false;
-      if (cat !== 'any' && d.cat !== cat) return false;
+      if (cat !== 'any' && GROUP_BY_CAT[d.cat] !== cat) return false;
       if (flavor !== 'any' && d.flavor !== flavor) return false;
       if (protein !== 'any' && d.protein !== protein) return false;
       if (style !== 'any' && d.style !== style) return false;
@@ -409,11 +420,12 @@
     });
     if (!pool.length) return null;
 
-    const weights = pool.map((d) => {
-      let w = freshnessWeight(d, fresh);
-      if (excludeId && d.id === excludeId) w *= 0.05;
-      return w;
-    });
+    if (excludeId) {
+      const rest = pool.filter((d) => d.id !== excludeId);
+      if (rest.length) pool = rest;
+    }
+
+    const weights = pool.map((d) => freshnessWeight(d, fresh));
     return weightedPick(pool, weights);
   }
 
@@ -442,7 +454,7 @@
     }).sort((a, b) => Number(b.rating) - Number(a.rating) || a.platform.localeCompare(b.platform));
   }
 
-  function renderStores(dish) {
+  function renderStores(dish, highlightStore) {
     const stores = buildStores(dish);
     return `
       <section class="stores-card" aria-label="附近店铺推荐（演示数据）">
@@ -459,11 +471,13 @@
                 <div class="store-top">
                   <span class="store-name">${s.brand}</span>
                   <span class="platform-badge ${s.key}">${s.platform}</span>
+                  ${highlightStore && highlightStore.platform === s.platform && highlightStore.brand === s.brand ? '<span class="last-badge">上次这家</span>' : ''}
                 </div>
                 <p class="store-meta"><strong>${s.rating}</strong> 分 · 约 ${s.minutes} 分钟 · 配送 ¥${s.fee} · 起送 ¥${s.minOrder}</p>
                 <p class="store-dish">招牌：${dish.name}</p>
               </div>
               <button type="button" class="store-go" data-store-query="${dish.name}" data-store-url="${s.url}"
+                data-store-key="${s.key}" data-store-platform="${s.platform}" data-store-brand="${s.brand}" data-store-rating="${s.rating}"
                 title="复制菜名并打开平台" aria-label="去${s.platform}搜索${dish.name}">去搜</button>
             </li>`).join('')}
         </ul>
@@ -495,9 +509,17 @@
     return Promise.resolve(fallbackCopy(text));
   }
 
-  function handleStoreSearch(btn) {
+  function handleStoreSearch(btn, kind) {
     const query = btn.dataset.storeQuery || '';
     const url = btn.dataset.storeUrl || '';
+    if (kind && results[kind]) {
+      results[kind].store = {
+        key: btn.dataset.storeKey || '',
+        platform: btn.dataset.storePlatform || '',
+        brand: btn.dataset.storeBrand || '',
+        rating: btn.dataset.storeRating || '',
+      };
+    }
     // 先同步复制，避免新标签页抢走焦点后剪贴板写入失败
     const copied = fallbackCopy(query);
     if (url) window.open(url, '_blank', 'noopener');
@@ -511,6 +533,8 @@
   }
 
   function pickForMe(isReroll) {
+    const prev = results.filter;
+    const wasRevealed = Boolean(prev.revealed);
     const dish = pickDish({
       spice: filters.spice,
       cat: filters.cat,
@@ -520,17 +544,31 @@
       fresh: filters.fresh,
       min: filters.min,
       max: filters.max,
-      excludeId: isReroll && results.filter.dish ? results.filter.dish.id : null,
+      excludeId: isReroll && prev.dish ? prev.dish.id : null,
     });
 
     if (!dish) {
-      results.filter = { dish: null, accepted: false, revealed: false };
+      sealedCount = 0;
+      results.filter = { dish: null, accepted: false, revealed: false, store: null };
       renderEmpty();
       return;
     }
 
-    results.filter = { dish, accepted: false, revealed: false };
-    renderSealed();
+    const same = Boolean(isReroll && prev.dish && prev.dish.id === dish.id);
+    results.filter = { dish, accepted: false, revealed: wasRevealed, store: null };
+
+    if (wasRevealed) {
+      renderResult('filter', dish, filters.fresh);
+    } else {
+      sealedCount = isReroll ? sealedCount + 1 : 1;
+      renderSealed();
+    }
+
+    if (isReroll) {
+      if (same) toast('这个条件下只剩这一道了，放宽一点试试');
+      else if (wasRevealed) toast('换了一道新的 🍽️');
+      else toast('换了一个新盲盒 🎁');
+    }
   }
 
   /* ------------------------------------------------------------------ */
@@ -567,7 +605,7 @@
   function activeFilterBits() {
     const bits = [];
     if (filters.spice !== 'any') bits.push(SPICE_LABELS[Number(filters.spice)]);
-    if (filters.cat !== 'any' && CAT_MAP[filters.cat]) bits.push(CAT_MAP[filters.cat].name);
+    if (filters.cat !== 'any' && GROUP_MAP[filters.cat]) bits.push(GROUP_MAP[filters.cat].name);
     if (filters.flavor !== 'any') bits.push(filters.flavor);
     if (filters.protein !== 'any') bits.push(filters.protein);
     if (filters.style !== 'any') bits.push(filters.style);
@@ -581,10 +619,11 @@
       ? `按你选的 ${bits.length} 个条件，从 ${DISHES.length} 道菜里挑了一个。`
       : `所有条件都随便，从 ${DISHES.length} 道菜里挑了一个。`;
 
+    const sealedTitle = sealedCount > 1 ? `第 ${sealedCount} 个盲盒已就绪` : '盲盒已就绪';
     filterSlot.innerHTML = `
       <article class="result-card sealed-card">
         <div class="seal-icon" aria-hidden="true">🎁</div>
-        <h3 class="sealed-title">盲盒已就绪</h3>
+        <h3 class="sealed-title">${sealedTitle}</h3>
         <p class="sealed-desc">${desc}<br>点开之前，先别偷看。</p>
         <div class="actions">
           <button type="button" class="btn btn-primary" data-act="reveal">揭晓答案</button>
@@ -608,7 +647,7 @@
     renderResult('filter', res.dish, filters.fresh);
   }
 
-  function renderResult(kind, dish, mode) {
+  function renderResult(kind, dish, mode, reasonOverride) {
     const slot = kind === 'wheel' ? wheelSlot : filterSlot;
     const cat = CAT_MAP[dish.cat];
     const eaten = countDish(dish.id);
@@ -633,13 +672,13 @@
             </div>
           </div>
         </div>
-        <p class="reason"><span class="reason-icon" aria-hidden="true">✨</span><span>${buildReason(dish, mode)}</span></p>
+        <p class="reason"><span class="reason-icon" aria-hidden="true">✨</span><span>${reasonOverride || buildReason(dish, mode)}</span></p>
         <div class="actions">
           <button type="button" class="btn btn-primary" data-act="accept">就吃这个</button>
           <button type="button" class="btn btn-ghost" data-act="reroll">${kind === 'wheel' ? '再转一次' : '换一个'}</button>
         </div>
       </article>
-      ${renderStores(dish)}`;
+      ${renderStores(dish, results[kind] ? results[kind].store : null)}`;
 
     if (kind === 'filter') syncFilterDock();
 
@@ -678,7 +717,8 @@
     if (!result.dish || result.accepted) return;
     result.accepted = true;
 
-    recordDish(result.dish);
+    const store = result.store || buildStores(result.dish)[0];
+    recordDish(result.dish, store);
     updateHistoryUI();
 
     btn.classList.add('btn-done');
@@ -755,13 +795,26 @@
     const recent = history
       .slice(-8)
       .reverse()
-      .map((h) => {
+      .map((h, i) => {
         const dish = DISH_MAP[h.id];
+        const store = h.store;
+        const index = history.length - 1 - i;
         return `
-          <li class="history-item">
-            <span class="history-emoji" aria-hidden="true">${dish.emoji}</span>
-            <span class="history-name">${dish.name}</span>
-            <span class="history-time">${formatTime(h.ts)}</span>
+          <li>
+            <button type="button" class="history-item" data-history-index="${index}" aria-label="再来一次 ${dish.name}">
+              <span class="history-emoji" aria-hidden="true">${dish.emoji}</span>
+              <span class="history-main">
+                <span class="history-top">
+                  <span class="history-name">${dish.name}</span>
+                  <span class="history-price">¥${dish.price}</span>
+                </span>
+                <span class="history-sub">${store ? `${store.platform} · ${store.brand}` : '未记录店铺'}</span>
+              </span>
+              <span class="history-side">
+                <span class="history-time">${formatTime(h.ts)}</span>
+                <span class="history-go">再来 ›</span>
+              </span>
+            </button>
           </li>`;
       })
       .join('');
@@ -795,6 +848,23 @@
 
   let lastFocus = null;
 
+  function replayHistory(index) {
+    const entry = history[index];
+    if (!entry) return;
+    const dish = DISH_MAP[entry.id];
+    if (!dish) return;
+
+    closeSheet();
+    setActiveTab('filter');
+    results.filter = { dish, accepted: false, revealed: true, store: entry.store || null };
+    sealedCount = 0;
+    const reason = entry.store
+      ? `上次点它是在${formatTime(entry.ts)}，店是「${entry.store.platform} · ${entry.store.brand}」。想再吃就点「就吃这个」。`
+      : `上次点它是在${formatTime(entry.ts)}。想再吃就点「就吃这个」。`;
+    renderResult('filter', dish, 'history', reason);
+    toast('从口味档案里翻出来了');
+  }
+
   function openSheet() {
     lastFocus = document.activeElement;
     renderSheet();
@@ -821,7 +891,12 @@
     const pool = DISHES.filter((d) => cats.some((c) => c.id === d.cat));
     for (let i = 0; i < 5; i += 1) {
       const dish = pool[Math.floor(Math.random() * pool.length)];
-      history.push({ id: dish.id, ts: Date.now() - (i * 19 + Math.random() * 9) * 3600 * 1000 });
+      const store = buildStores(dish)[0];
+      history.push({
+        id: dish.id,
+        ts: Date.now() - (i * 19 + Math.random() * 9) * 3600 * 1000,
+        store: { key: store.key, platform: store.platform, brand: store.brand, rating: store.rating },
+      });
     }
     history = history.sort((a, b) => a.ts - b.ts).slice(-MAX_HISTORY);
     saveHistory();
@@ -888,16 +963,19 @@
   /* 事件绑定                                                            */
   /* ------------------------------------------------------------------ */
 
+  function setActiveTab(name) {
+    tabs.dataset.active = name;
+    $$('.tab', tabs).forEach((t) => t.setAttribute('aria-selected', String(t.dataset.tab === name)));
+    $('#panel-wheel').hidden = name !== 'wheel';
+    $('#panel-filter').hidden = name !== 'filter';
+    if (name === 'wheel') requestAnimationFrame(drawWheel);
+  }
+
   function bindTabs() {
     tabs.addEventListener('click', (e) => {
       const tab = e.target.closest('.tab');
       if (!tab) return;
-      const name = tab.dataset.tab;
-      tabs.dataset.active = name;
-      $$('.tab', tabs).forEach((t) => t.setAttribute('aria-selected', String(t === tab)));
-      $('#panel-wheel').hidden = name !== 'wheel';
-      $('#panel-filter').hidden = name !== 'filter';
-      if (name === 'wheel') requestAnimationFrame(drawWheel);
+      setActiveTab(tab.dataset.tab);
     });
   }
 
@@ -908,7 +986,7 @@
     wheelSlot.addEventListener('click', (e) => {
       const storeBtn = e.target.closest('[data-store-query]');
       if (storeBtn) {
-        handleStoreSearch(storeBtn);
+        handleStoreSearch(storeBtn, 'wheel');
         return;
       }
       const btn = e.target.closest('button[data-act]');
@@ -967,7 +1045,7 @@
     filterSlot.addEventListener('click', (e) => {
       const storeBtn = e.target.closest('[data-store-query]');
       if (storeBtn) {
-        handleStoreSearch(storeBtn);
+        handleStoreSearch(storeBtn, 'filter');
         return;
       }
       const btn = e.target.closest('button[data-act]');
@@ -998,7 +1076,8 @@
   }
 
   function clearFilterResult() {
-    results.filter = { dish: null, accepted: false, revealed: false };
+    results.filter = { dish: null, accepted: false, revealed: false, store: null };
+    sealedCount = 0;
     filterSlot.innerHTML = '';
     syncFilterDock();
   }
@@ -1034,6 +1113,11 @@
     });
 
     sheetBody.addEventListener('click', (e) => {
+      const historyRow = e.target.closest('[data-history-index]');
+      if (historyRow) {
+        replayHistory(Number(historyRow.dataset.historyIndex));
+        return;
+      }
       const btn = e.target.closest('button[data-act]');
       if (!btn) return;
       if (btn.dataset.act === 'seed') seedHistory();

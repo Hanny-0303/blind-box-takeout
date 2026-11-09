@@ -10,7 +10,7 @@
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="盲盒外卖" />
   <meta property="og:title" content="盲盒外卖 · 今天吃什么" />
-  <meta property="og:description" content="21 个分类、129 道菜，转盘 + 精准盲盒，随机决定今天吃什么。纯前端，打开就能用。" />
+  <meta property="og:description" content="21 个分类、210 道菜，转盘 + 精准盲盒，随机决定今天吃什么。纯前端，打开就能用。" />
   <meta property="og:url" content="https://hanny-0303.github.io/blind-box-takeout/" />
   <meta property="og:image" content="https://hanny-0303.github.io/blind-box-takeout/docs/og-cover.jpg" />
   <meta property="og:image:width" content="1200" />
@@ -73,7 +73,7 @@
 
       <!-- ================= 精准盲盒 ================= -->
       <section class="panel" id="panel-filter" role="tabpanel" aria-labelledby="tab-filter" hidden>
-        <p class="panel-lead">7 个条件，从 21 个分类、129 道菜里开盲盒。</p>
+        <p class="panel-lead">7 个条件，从 21 个分类、210 道菜里开盲盒。</p>
 
         <div class="filter-block">
           <div class="field-head">
@@ -94,71 +94,26 @@
           <div class="field-head">
             <span class="idx">02</span>
             <span class="field-title">分类</span>
-            <span class="field-note">21 种细分</span>
+            <span class="field-note">5 个大类</span>
           </div>
-          <div class="chips chips-grouped" data-group="cat" role="group" aria-label="分类">
+          <div class="chips" data-group="cat" role="group" aria-label="分类">
             <button type="button" class="chip" data-value="any" aria-pressed="true">随便</button>
-
-            <div class="chip-row">
-              <span class="chip-label">主食</span>
-              <div class="chip-set">
-                <button type="button" class="chip" data-value="bowl" aria-pressed="false">🍚 盖饭</button>
-                <button type="button" class="chip" data-value="friedrice" aria-pressed="false">🍳 炒饭</button>
-                <button type="button" class="chip" data-value="soupnoodle" aria-pressed="false">🍜 汤面</button>
-                <button type="button" class="chip" data-value="drynoodle" aria-pressed="false">🥢 拌面</button>
-                <button type="button" class="chip" data-value="ricenoodle" aria-pressed="false">🍲 米粉</button>
-                <button type="button" class="chip" data-value="mixian" aria-pressed="false">🥘 米线</button>
-              </div>
-            </div>
-
-            <div class="chip-row">
-              <span class="chip-label">重口</span>
-              <div class="chip-set">
-                <button type="button" class="chip" data-value="malatang" aria-pressed="false">🌶️ 麻辣烫</button>
-                <button type="button" class="chip" data-value="hotpot" aria-pressed="false">🍲 火锅</button>
-                <button type="button" class="chip" data-value="bbq" aria-pressed="false">🍢 烧烤</button>
-                <button type="button" class="chip" data-value="sichuan" aria-pressed="false">🔥 川湘菜</button>
-              </div>
-            </div>
-
-            <div class="chip-row">
-              <span class="chip-label">异国</span>
-              <div class="chip-set">
-                <button type="button" class="chip" data-value="burger" aria-pressed="false">🍔 炸鸡汉堡</button>
-                <button type="button" class="chip" data-value="pizza" aria-pressed="false">🍕 披萨意面</button>
-                <button type="button" class="chip" data-value="japanese" aria-pressed="false">🍣 日料</button>
-                <button type="button" class="chip" data-value="korean" aria-pressed="false">🍙 韩餐</button>
-                <button type="button" class="chip" data-value="sea" aria-pressed="false">🍛 东南亚</button>
-              </div>
-            </div>
-
-            <div class="chip-row">
-              <span class="chip-label">家常</span>
-              <div class="chip-set">
-                <button type="button" class="chip" data-value="cantonese" aria-pressed="false">🍗 粤菜烧腊</button>
-                <button type="button" class="chip" data-value="dumpling" aria-pressed="false">🥟 饺子包子</button>
-                <button type="button" class="chip" data-value="snack" aria-pressed="false">🍢 小吃卤味</button>
-                <button type="button" class="chip" data-value="breakfast" aria-pressed="false">🥣 早餐</button>
-              </div>
-            </div>
-
-            <div class="chip-row">
-              <span class="chip-label">轻盈</span>
-              <div class="chip-set">
-                <button type="button" class="chip" data-value="light" aria-pressed="false">🥗 轻食</button>
-                <button type="button" class="chip" data-value="dessert" aria-pressed="false">🍰 甜品饮品</button>
-              </div>
-            </div>
+            <button type="button" class="chip" data-value="staple" title="饭、面、粉、米线、饺子、早餐" aria-pressed="false">🍚 主食</button>
+            <button type="button" class="chip" data-value="flavor" title="麻辣烫、火锅、烧烤" aria-pressed="false">🌶️ 口味</button>
+            <button type="button" class="chip" data-value="snack" title="炸鸡汉堡、卤味、轻食" aria-pressed="false">🍢 小吃</button>
+            <button type="button" class="chip" data-value="drink" title="奶茶、咖啡、甜品" aria-pressed="false">🧋 饮品</button>
+            <button type="button" class="chip" data-value="cuisine" title="川湘、粤菜、日料、韩餐、东南亚、西餐" aria-pressed="false">🍣 菜系</button>
           </div>
+          <p class="cat-note">主食：饭 / 面 / 粉 / 米线 / 饺子 / 早餐<br>口味：麻辣烫 / 火锅 / 烧烤<br>菜系：川湘 / 粤菜 / 日料 / 韩餐 / 东南亚 / 西餐</p>
         </div>
 
         <div class="filter-block">
           <div class="field-head">
             <span class="idx">03</span>
-            <span class="field-title">口味</span>
+            <span class="field-title">味道</span>
             <span class="field-note">想吃哪种味道</span>
           </div>
-          <div class="chips" data-group="flavor" role="group" aria-label="口味">
+          <div class="chips" data-group="flavor" role="group" aria-label="味道">
             <button type="button" class="chip" data-value="any" aria-pressed="true">随便</button>
             <button type="button" class="chip" data-value="清淡" aria-pressed="false">清淡</button>
             <button type="button" class="chip" data-value="咸香" aria-pressed="false">咸香</button>

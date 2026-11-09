@@ -6,31 +6,59 @@
  * style: 汤汤水水 / 干香 / 小炒 / 炸烤 / 凉食 / 蒸煮
  */
 const CATEGORIES = [
-  { id: 'bowl', name: '盖饭', emoji: '🍚', color: '#FFE3C9', group: '主食' },
-  { id: 'friedrice', name: '炒饭', emoji: '🍳', color: '#FFF0BF', group: '主食' },
-  { id: 'soupnoodle', name: '汤面', emoji: '🍜', color: '#FCE2A8', group: '主食' },
-  { id: 'drynoodle', name: '拌面', emoji: '🥢', color: '#E9F2C6', group: '主食' },
-  { id: 'ricenoodle', name: '米粉', emoji: '🍲', color: '#DDF0D2', group: '主食' },
-  { id: 'mixian', name: '米线', emoji: '🥘', color: '#D9F0EA', group: '主食' },
+  { id: 'bowl', name: '盖饭', emoji: '🍚', color: '#FFE3C9' },
+  { id: 'friedrice', name: '炒饭', emoji: '🍳', color: '#FFF0BF' },
+  { id: 'soupnoodle', name: '汤面', emoji: '🍜', color: '#FCE2A8' },
+  { id: 'drynoodle', name: '拌面', emoji: '🥢', color: '#E9F2C6' },
+  { id: 'ricenoodle', name: '米粉', emoji: '🍲', color: '#DDF0D2' },
+  { id: 'mixian', name: '米线', emoji: '🥘', color: '#D9F0EA' },
 
-  { id: 'malatang', name: '麻辣烫', emoji: '🌶️', color: '#FFD9D1', group: '重口' },
-  { id: 'hotpot', name: '火锅', emoji: '🍲', color: '#FFD5CC', group: '重口' },
-  { id: 'bbq', name: '烧烤', emoji: '🍢', color: '#F3D2B8', group: '重口' },
-  { id: 'sichuan', name: '川湘菜', emoji: '🔥', color: '#FFCFC2', group: '重口' },
+  { id: 'malatang', name: '麻辣烫', emoji: '🌶️', color: '#FFD9D1' },
+  { id: 'hotpot', name: '火锅', emoji: '🍲', color: '#FFD5CC' },
+  { id: 'bbq', name: '烧烤', emoji: '🍢', color: '#F3D2B8' },
+  { id: 'sichuan', name: '川湘菜', emoji: '🔥', color: '#FFCFC2' },
 
-  { id: 'burger', name: '炸鸡汉堡', emoji: '🍔', color: '#FFE0C2', group: '异国' },
-  { id: 'pizza', name: '披萨意面', emoji: '🍕', color: '#FFE7C9', group: '异国' },
-  { id: 'japanese', name: '日料', emoji: '🍣', color: '#E5E0FA', group: '异国' },
-  { id: 'korean', name: '韩餐', emoji: '🍙', color: '#F0DDEB', group: '异国' },
-  { id: 'sea', name: '东南亚', emoji: '🍛', color: '#DFF0D6', group: '异国' },
+  { id: 'burger', name: '炸鸡汉堡', emoji: '🍔', color: '#FFE0C2' },
+  { id: 'pizza', name: '披萨意面', emoji: '🍕', color: '#FFE7C9' },
+  { id: 'japanese', name: '日料', emoji: '🍣', color: '#E5E0FA' },
+  { id: 'korean', name: '韩餐', emoji: '🍙', color: '#F0DDEB' },
+  { id: 'sea', name: '东南亚', emoji: '🍛', color: '#DFF0D6' },
 
-  { id: 'cantonese', name: '粤菜烧腊', emoji: '🍗', color: '#FFE9D6', group: '家常' },
-  { id: 'dumpling', name: '饺子包子', emoji: '🥟', color: '#F5E7D2', group: '家常' },
-  { id: 'snack', name: '小吃卤味', emoji: '🍢', color: '#F7DCC8', group: '家常' },
-  { id: 'breakfast', name: '早餐', emoji: '🥣', color: '#F0E9D8', group: '家常' },
+  { id: 'cantonese', name: '粤菜烧腊', emoji: '🍗', color: '#FFE9D6' },
+  { id: 'dumpling', name: '饺子包子', emoji: '🥟', color: '#F5E7D2' },
+  { id: 'snack', name: '小吃卤味', emoji: '🍢', color: '#F7DCC8' },
+  { id: 'breakfast', name: '早餐', emoji: '🥣', color: '#F0E9D8' },
 
-  { id: 'light', name: '轻食', emoji: '🥗', color: '#DFF3D8', group: '轻盈' },
-  { id: 'dessert', name: '甜品饮品', emoji: '🍰', color: '#F6DEE8', group: '轻盈' },
+  { id: 'light', name: '轻食', emoji: '🥗', color: '#DFF3D8' },
+  { id: 'dessert', name: '甜品饮品', emoji: '🍰', color: '#F6DEE8' },
+];
+
+const CATEGORY_GROUPS = [
+  {
+    id: 'staple', name: '主食', emoji: '🍚',
+    note: '饭 · 面 · 粉 · 米线 · 饺子 · 早餐',
+    cats: ['bowl', 'friedrice', 'soupnoodle', 'drynoodle', 'ricenoodle', 'mixian', 'dumpling', 'breakfast'],
+  },
+  {
+    id: 'flavor', name: '口味', emoji: '🌶️',
+    note: '麻辣烫 · 火锅 · 烧烤',
+    cats: ['malatang', 'hotpot', 'bbq'],
+  },
+  {
+    id: 'snack', name: '小吃', emoji: '🍢',
+    note: '炸鸡汉堡 · 卤味 · 轻食',
+    cats: ['burger', 'snack', 'light'],
+  },
+  {
+    id: 'drink', name: '饮品', emoji: '🧋',
+    note: '奶茶 · 咖啡 · 甜品',
+    cats: ['dessert'],
+  },
+  {
+    id: 'cuisine', name: '菜系', emoji: '🍣',
+    note: '川湘 · 粤菜 · 日料 · 韩餐 · 东南亚 · 西餐',
+    cats: ['sichuan', 'cantonese', 'japanese', 'korean', 'sea', 'pizza'],
+  },
 ];
 
 const SPICE_LABELS = ['不辣', '微辣', '正常辣', '加辣'];
@@ -210,4 +238,129 @@ const DISHES = [
   { id: 'ds4', name: '珍珠奶茶', short: '奶茶', cat: 'dessert', spice: 0, price: 15, emoji: '🧋', desc: '三分糖去冰，快乐水', flavor: '酸甜', protein: '素食', style: '凉食' },
   { id: 'ds5', name: '蛋挞', short: '蛋挞', cat: 'dessert', spice: 0, price: 10, emoji: '🥧', desc: '酥皮掉渣，蛋香浓郁', flavor: '酸甜', protein: '素食', style: '炸烤' },
   { id: 'ds6', name: '红豆双皮奶', short: '双皮奶', cat: 'dessert', spice: 0, price: 18, emoji: '🍮', desc: '奶皮厚实，红豆绵软', flavor: '酸甜', protein: '素食', style: '凉食' },
+  /* ================= 补充菜品：每个分类凑满 10 道 ================= */
+
+  /* 盖饭 +3 */
+  { id: 'bo1', name: '宫保鸡丁盖饭', short: '宫保鸡丁', cat: 'bowl', spice: 2, price: 24, emoji: '🥜', desc: '花生脆、鸡丁嫩，酸甜带辣', flavor: '酸甜', protein: '鸡肉', style: '小炒' },
+  { id: 'bo2', name: '黑椒牛柳盖饭', short: '黑椒牛柳', cat: 'bowl', spice: 1, price: 32, emoji: '🥩', desc: '黑椒汁浓，牛柳给得大方', flavor: '咸香', protein: '牛肉', style: '小炒' },
+  { id: 'bo3', name: '梅菜扣肉饭', short: '梅菜扣肉', cat: 'bowl', spice: 0, price: 30, emoji: '🍖', desc: '肥而不腻，梅菜比肉还下饭', flavor: '咸香', protein: '猪肉', style: '蒸煮' },
+
+  /* 炒饭 +4 */
+  { id: 'fr6', name: '虾仁蛋炒饭', short: '虾仁炒饭', cat: 'friedrice', spice: 0, price: 26, emoji: '🍤', desc: '虾仁弹牙，蛋香裹着米粒', flavor: '鲜香', protein: '海鲜', style: '小炒' },
+  { id: 'fr7', name: '酱油炒饭', short: '酱油炒饭', cat: 'friedrice', spice: 0, price: 14, emoji: '🍚', desc: '酱油香一炒就出来，朴素但上头', flavor: '咸香', protein: '素食', style: '小炒' },
+  { id: 'fr8', name: '牛肉粒炒饭', short: '牛肉炒饭', cat: 'friedrice', spice: 1, price: 30, emoji: '🥩', desc: '牛肉粒有嚼劲，黑椒提味', flavor: '咸香', protein: '牛肉', style: '小炒' },
+  { id: 'fr9', name: '咖喱鸡肉炒饭', short: '咖喱炒饭', cat: 'friedrice', spice: 1, price: 26, emoji: '🍛', desc: '咖喱粉裹满每粒米', flavor: '咸香', protein: '鸡肉', style: '小炒' },
+
+  /* 汤面 +3 */
+  { id: 'sn3', name: '红烧牛肉面', short: '红烧牛肉', cat: 'soupnoodle', spice: 1, price: 28, emoji: '🍜', desc: '汤浓肉大块，面条筋道', flavor: '咸香', protein: '牛肉', style: '汤汤水水' },
+  { id: 'sn4', name: '番茄牛腩面', short: '番茄牛腩', cat: 'soupnoodle', spice: 0, price: 30, emoji: '🍅', desc: '番茄熬到起沙，牛腩软烂', flavor: '酸甜', protein: '牛肉', style: '汤汤水水' },
+  { id: 'sn5', name: '海鲜汤面', short: '海鲜汤面', cat: 'soupnoodle', spice: 0, price: 32, emoji: '🦐', desc: '虾、蛤蜊、鱿鱼，一碗海味', flavor: '鲜香', protein: '海鲜', style: '汤汤水水' },
+
+  /* 拌面 +4 */
+  { id: 'dn4', name: '韩式炸酱面', short: '韩式炸酱', cat: 'drynoodle', spice: 0, price: 22, emoji: '🍜', desc: '春酱甜咸，配黄萝卜', flavor: '咸香', protein: '猪肉', style: '干香' },
+  { id: 'dn5', name: '葱油开洋面', short: '开洋拌面', cat: 'drynoodle', spice: 0, price: 24, emoji: '🍤', desc: '开洋提鲜，葱油香得直接', flavor: '鲜香', protein: '海鲜', style: '干香' },
+  { id: 'dn6', name: '川味凉面', short: '川味凉面', cat: 'drynoodle', spice: 2, price: 16, emoji: '🌶️', desc: '麻辣带甜，夏天来一碗', flavor: '麻辣', protein: '素食', style: '凉食' },
+  { id: 'dn7', name: '鸡丝凉面', short: '鸡丝凉面', cat: 'drynoodle', spice: 1, price: 20, emoji: '🍗', desc: '芝麻酱拌鸡丝，清爽管饱', flavor: '咸香', protein: '鸡肉', style: '凉食' },
+
+  /* 米粉 +4 */
+  { id: 'rn1', name: '南宁老友粉', short: '老友粉', cat: 'ricenoodle', spice: 2, price: 22, emoji: '🍜', desc: '酸笋豆豉爆香，南宁人的早晨', flavor: '酸爽', protein: '猪肉', style: '汤汤水水' },
+  { id: 'rn2', name: '衡阳鱼粉', short: '衡阳鱼粉', cat: 'ricenoodle', spice: 2, price: 24, emoji: '🐟', desc: '鱼汤奶白，辣得温和', flavor: '香辣', protein: '海鲜', style: '汤汤水水' },
+  { id: 'rn3', name: '潮汕粿条', short: '潮汕粿条', cat: 'ricenoodle', spice: 0, price: 28, emoji: '🍲', desc: '清汤牛肉丸，粿条滑溜', flavor: '清淡', protein: '牛肉', style: '汤汤水水' },
+  { id: 'rn4', name: '海南粉', short: '海南粉', cat: 'ricenoodle', spice: 1, price: 20, emoji: '🥢', desc: '卤汁拌粉，配黄灯笼椒', flavor: '咸香', protein: '猪肉', style: '干香' },
+
+  /* 米线 +4 */
+  { id: 'mx1', name: '砂锅米线', short: '砂锅米线', cat: 'mixian', spice: 1, price: 26, emoji: '🍲', desc: '砂锅端上来还在滚', flavor: '咸香', protein: '猪肉', style: '汤汤水水' },
+  { id: 'mx2', name: '泡椒米线', short: '泡椒米线', cat: 'mixian', spice: 2, price: 24, emoji: '🌶️', desc: '泡椒酸辣，越吃越开胃', flavor: '酸爽', protein: '鸡肉', style: '汤汤水水' },
+  { id: 'mx3', name: '三鲜米线', short: '三鲜米线', cat: 'mixian', spice: 0, price: 26, emoji: '🍤', desc: '虾仁、肉片、菌菇，清鲜', flavor: '鲜香', protein: '海鲜', style: '汤汤水水' },
+  { id: 'mx4', name: '麻辣米线', short: '麻辣米线', cat: 'mixian', spice: 3, price: 22, emoji: '🌶️', desc: '红油铺满，重口爱好者', flavor: '麻辣', protein: '素食', style: '汤汤水水' },
+
+  /* 麻辣烫 +4 */
+  { id: 'mt1', name: '骨汤麻辣烫', short: '骨汤烫', cat: 'malatang', spice: 0, price: 28, emoji: '🍲', desc: '骨汤打底，不辣也香', flavor: '咸香', protein: '素食', style: '汤汤水水' },
+  { id: 'mt2', name: '酸辣麻辣烫', short: '酸辣烫', cat: 'malatang', spice: 2, price: 28, emoji: '🌶️', desc: '酸辣汤底，蔬菜吸汁', flavor: '酸爽', protein: '素食', style: '汤汤水水' },
+  { id: 'mt3', name: '麻酱麻辣烫', short: '麻酱烫', cat: 'malatang', spice: 0, price: 30, emoji: '🥜', desc: '麻酱厚厚一层，干拌派', flavor: '咸香', protein: '素食', style: '干香' },
+  { id: 'mt4', name: '藤椒麻辣烫', short: '藤椒烫', cat: 'malatang', spice: 2, price: 30, emoji: '🌿', desc: '藤椒清麻，后劲很足', flavor: '麻辣', protein: '素食', style: '汤汤水水' },
+
+  /* 火锅 +4 */
+  { id: 'hp7', name: '番茄牛腩锅', short: '番茄牛腩锅', cat: 'hotpot', spice: 0, price: 52, emoji: '🍅', desc: '番茄汤底，牛腩炖到软', flavor: '酸甜', protein: '牛肉', style: '汤汤水水' },
+  { id: 'hp8', name: '麻辣牛油锅', short: '牛油锅', cat: 'hotpot', spice: 3, price: 58, emoji: '🌶️', desc: '牛油锅底，涮啥都香', flavor: '麻辣', protein: '牛肉', style: '汤汤水水' },
+  { id: 'hp9', name: '猪肚鸡火锅', short: '猪肚鸡', cat: 'hotpot', spice: 0, price: 62, emoji: '🍲', desc: '胡椒猪肚鸡，先喝三碗汤', flavor: '清淡', protein: '鸡肉', style: '汤汤水水' },
+  { id: 'hp10', name: '寿喜锅', short: '寿喜锅', cat: 'hotpot', spice: 0, price: 58, emoji: '🍲', desc: '甜咸锅底，牛肉蘸蛋液', flavor: '酸甜', protein: '牛肉', style: '汤汤水水' },
+
+  /* 烧烤 +4 */
+  { id: 'bb7', name: '烤肉拼盘', short: '烤肉拼盘', cat: 'bbq', spice: 1, price: 58, emoji: '🥩', desc: '猪牛鸡都有，适合分着吃', flavor: '咸香', protein: '猪肉', style: '炸烤' },
+  { id: 'bb8', name: '蒜蓉烤生蚝', short: '烤生蚝', cat: 'bbq', spice: 1, price: 38, emoji: '🦪', desc: '蒜蓉铺满，蚝肉肥美', flavor: '鲜香', protein: '海鲜', style: '炸烤' },
+  { id: 'bb9', name: '烤韭菜', short: '烤韭菜', cat: 'bbq', spice: 0, price: 12, emoji: '🌿', desc: '烤到微焦，撒孜然', flavor: '咸香', protein: '素食', style: '炸烤' },
+  { id: 'bb10', name: '烤鸡皮', short: '烤鸡皮', cat: 'bbq', spice: 2, price: 18, emoji: '🍢', desc: '焦脆冒油，一串不够', flavor: '香辣', protein: '鸡肉', style: '炸烤' },
+
+  /* 炸鸡汉堡 +3 */
+  { id: 'b8', name: '鳕鱼堡', short: '鳕鱼堡', cat: 'burger', spice: 0, price: 28, emoji: '🐟', desc: '外酥里嫩，塔塔酱解腻', flavor: '咸香', protein: '海鲜', style: '炸烤' },
+  { id: 'b9', name: '鸡块套餐', short: '鸡块套餐', cat: 'burger', spice: 1, price: 26, emoji: '🍗', desc: '鸡块配薯条，追剧标配', flavor: '咸香', protein: '鸡肉', style: '炸烤' },
+  { id: 'b10', name: '培根蛋堡', short: '培根蛋堡', cat: 'burger', spice: 0, price: 26, emoji: '🥓', desc: '培根煎蛋，早餐感拉满', flavor: '咸香', protein: '猪肉', style: '炸烤' },
+
+  /* 披萨意面 +4 */
+  { id: 'pz7', name: '夏威夷披萨', short: '夏威夷', cat: 'pizza', spice: 0, price: 48, emoji: '🍍', desc: '菠萝配火腿，甜咸党争议款', flavor: '酸甜', protein: '猪肉', style: '炸烤' },
+  { id: 'pz8', name: '芝士焗饭', short: '芝士焗饭', cat: 'pizza', spice: 0, price: 35, emoji: '🧀', desc: '芝士拉丝，饭粒裹满奶香', flavor: '咸香', protein: '素食', style: '炸烤' },
+  { id: 'pz9', name: '肉酱千层面', short: '千层面', cat: 'pizza', spice: 0, price: 45, emoji: '🍝', desc: '一层肉酱一层面，叉子切下去', flavor: '酸甜', protein: '牛肉', style: '炸烤' },
+  { id: 'pz10', name: '蒜香面包', short: '蒜香面包', cat: 'pizza', spice: 0, price: 18, emoji: '🥖', desc: '蒜香黄油，边角烤得脆', flavor: '咸香', protein: '素食', style: '炸烤' },
+
+  /* 日料 +4 */
+  { id: 'jp1', name: '亲子丼', short: '亲子丼', cat: 'japanese', spice: 0, price: 38, emoji: '🍚', desc: '滑蛋鸡肉盖饭，甜咸酱汁', flavor: '咸香', protein: '鸡肉', style: '干香' },
+  { id: 'jp2', name: '咖喱猪排饭', short: '咖喱猪排', cat: 'japanese', spice: 1, price: 42, emoji: '🍛', desc: '猪排酥脆，咖喱浓稠', flavor: '咸香', protein: '猪肉', style: '炸烤' },
+  { id: 'jp3', name: '味噌汤定食', short: '味噌定食', cat: 'japanese', spice: 0, price: 45, emoji: '🍱', desc: '烤鱼、米饭、味噌汤，清淡', flavor: '清淡', protein: '海鲜', style: '干香' },
+  { id: 'jp4', name: '章鱼小丸子', short: '章鱼丸子', cat: 'japanese', spice: 0, price: 22, emoji: '🐙', desc: '外脆内软，木鱼花会跳舞', flavor: '咸香', protein: '海鲜', style: '炸烤' },
+
+  /* 韩餐 +4 */
+  { id: 'kr6', name: '韩式拌冷面', short: '拌冷面', cat: 'korean', spice: 1, price: 26, emoji: '🍜', desc: '甜辣酱拌冷面，越吃越凉快', flavor: '酸甜', protein: '素食', style: '凉食' },
+  { id: 'kr7', name: '芝士年糕', short: '芝士年糕', cat: 'korean', spice: 2, price: 30, emoji: '🧀', desc: '芝士拉丝，年糕软糯', flavor: '香辣', protein: '素食', style: '小炒' },
+  { id: 'kr8', name: '韩式烤五花', short: '烤五花', cat: 'korean', spice: 1, price: 55, emoji: '🥓', desc: '生菜包肉，配蒜片和酱', flavor: '咸香', protein: '猪肉', style: '炸烤' },
+  { id: 'kr9', name: '大酱汤', short: '大酱汤', cat: 'korean', spice: 0, price: 32, emoji: '🍲', desc: '大酱咸鲜，豆腐土豆管饱', flavor: '咸香', protein: '素食', style: '汤汤水水' },
+
+  /* 东南亚 +4 */
+  { id: 'se7', name: '泰式绿咖喱', short: '绿咖喱', cat: 'sea', spice: 2, price: 42, emoji: '🍛', desc: '椰香绿咖喱，辣得温柔', flavor: '香辣', protein: '鸡肉', style: '干香' },
+  { id: 'se8', name: '越南春卷', short: '越南春卷', cat: 'sea', spice: 0, price: 26, emoji: '🌯', desc: '米纸卷虾仁，蘸鱼露', flavor: '清淡', protein: '海鲜', style: '凉食' },
+  { id: 'se9', name: '新加坡叻沙', short: '叻沙', cat: 'sea', spice: 2, price: 38, emoji: '🍜', desc: '椰浆咖喱汤，米粉吸满', flavor: '香辣', protein: '海鲜', style: '汤汤水水' },
+  { id: 'se10', name: '泰式烤鸡', short: '泰式烤鸡', cat: 'sea', spice: 1, price: 36, emoji: '🍗', desc: '香茅腌过，皮脆肉嫩', flavor: '酸甜', protein: '鸡肉', style: '炸烤' },
+
+  /* 川湘菜 +4 */
+  { id: 'sc7', name: '回锅肉', short: '回锅肉', cat: 'sichuan', spice: 2, price: 38, emoji: '🥓', desc: '灯盏窝的肥肉，蒜苗爆香', flavor: '香辣', protein: '猪肉', style: '小炒' },
+  { id: 'sc8', name: '鱼香茄子', short: '鱼香茄子', cat: 'sichuan', spice: 1, price: 26, emoji: '🍆', desc: '茄子软糯，鱼香汁拌饭', flavor: '酸甜', protein: '素食', style: '小炒' },
+  { id: 'sc9', name: '酸菜鱼', short: '酸菜鱼', cat: 'sichuan', spice: 2, price: 48, emoji: '🐟', desc: '酸菜开胃，鱼片滑嫩', flavor: '酸爽', protein: '海鲜', style: '汤汤水水' },
+  { id: 'sc10', name: '宫保鸡丁', short: '宫保鸡丁', cat: 'sichuan', spice: 1, price: 35, emoji: '🥜', desc: '花生鸡丁，糊辣荔枝味', flavor: '酸甜', protein: '鸡肉', style: '小炒' },
+
+  /* 粤菜烧腊 +4 */
+  { id: 'ct5', name: '豉油鸡饭', short: '豉油鸡', cat: 'cantonese', spice: 0, price: 30, emoji: '🍗', desc: '豉油香浸到骨头，配姜葱', flavor: '咸香', protein: '鸡肉', style: '干香' },
+  { id: 'ct6', name: '叉烧包', short: '叉烧包', cat: 'cantonese', spice: 0, price: 16, emoji: '🥟', desc: '开花的包子，甜咸叉烧馅', flavor: '酸甜', protein: '猪肉', style: '蒸煮' },
+  { id: 'ct7', name: '艇仔粥', short: '艇仔粥', cat: 'cantonese', spice: 0, price: 18, emoji: '🥣', desc: '鱼片花生油条，粥底绵', flavor: '清淡', protein: '海鲜', style: '汤汤水水' },
+  { id: 'ct8', name: '咕噜肉', short: '咕噜肉', cat: 'cantonese', spice: 0, price: 36, emoji: '🍖', desc: '外脆里嫩，菠萝解腻', flavor: '酸甜', protein: '猪肉', style: '炸烤' },
+
+  /* 轻食 +4 */
+  { id: 'lt1', name: '烤鸡胸蔬菜碗', short: '烤鸡胸碗', cat: 'light', spice: 0, price: 34, emoji: '🥗', desc: '鸡胸不柴，南瓜很甜', flavor: '清淡', protein: '鸡肉', style: '凉食' },
+  { id: 'lt2', name: '烟熏三文鱼沙拉', short: '三文鱼沙拉', cat: 'light', spice: 0, price: 42, emoji: '🥗', desc: '烟熏味配油醋汁，很清爽', flavor: '清淡', protein: '海鲜', style: '凉食' },
+  { id: 'lt3', name: '全麦鸡蛋三明治', short: '鸡蛋三明治', cat: 'light', spice: 0, price: 24, emoji: '🥪', desc: '全麦面包夹厚蛋，简单', flavor: '清淡', protein: '素食', style: '凉食' },
+  { id: 'lt4', name: '奇亚籽酸奶杯', short: '酸奶杯', cat: 'light', spice: 0, price: 20, emoji: '🥛', desc: '酸奶加奇亚籽，饱腹感强', flavor: '酸甜', protein: '素食', style: '凉食' },
+
+  /* 早餐 +4 */
+  { id: 'bf7', name: '小馄饨', short: '小馄饨', cat: 'breakfast', spice: 0, price: 14, emoji: '🥟', desc: '皮薄如纸，汤里撒葱花', flavor: '清淡', protein: '猪肉', style: '汤汤水水' },
+  { id: 'bf8', name: '豆腐脑', short: '豆腐脑', cat: 'breakfast', spice: 0, price: 8, emoji: '🥣', desc: '咸口豆腐脑，浇卤汁', flavor: '咸香', protein: '素食', style: '蒸煮' },
+  { id: 'bf9', name: '鸡蛋灌饼', short: '鸡蛋灌饼', cat: 'breakfast', spice: 0, price: 12, emoji: '🫓', desc: '蛋液灌进饼里，刷甜面酱', flavor: '咸香', protein: '素食', style: '炸烤' },
+  { id: 'bf10', name: '手抓饼', short: '手抓饼', cat: 'breakfast', spice: 0, price: 10, emoji: '🫓', desc: '加蛋加肠，层层酥脆', flavor: '咸香', protein: '素食', style: '炸烤' },
+
+  /* 饺子包子 +4 */
+  { id: 'dp7', name: '三鲜饺子', short: '三鲜饺子', cat: 'dumpling', spice: 0, price: 24, emoji: '🥟', desc: '虾仁韭菜鸡蛋，鲜得很', flavor: '鲜香', protein: '海鲜', style: '蒸煮' },
+  { id: 'dp8', name: '牛肉大葱饺子', short: '牛肉饺子', cat: 'dumpling', spice: 0, price: 26, emoji: '🥟', desc: '牛肉馅扎实，葱香足', flavor: '咸香', protein: '牛肉', style: '蒸煮' },
+  { id: 'dp9', name: '素三鲜包子', short: '素三鲜包', cat: 'dumpling', spice: 0, price: 12, emoji: '🥟', desc: '青菜香菇粉丝，清爽', flavor: '咸香', protein: '素食', style: '蒸煮' },
+  { id: 'dp10', name: '锅贴饺', short: '锅贴饺', cat: 'dumpling', spice: 0, price: 18, emoji: '🥟', desc: '煎到底脆，蘸醋更好吃', flavor: '咸香', protein: '猪肉', style: '炸烤' },
+
+  /* 小吃卤味 +4 */
+  { id: 'sk6', name: '炸鸡锁骨', short: '鸡锁骨', cat: 'snack', spice: 2, price: 20, emoji: '🍗', desc: '越啃越香，追剧杀手', flavor: '香辣', protein: '鸡肉', style: '炸烤' },
+  { id: 'sk7', name: '卤藕片', short: '卤藕片', cat: 'snack', spice: 0, price: 10, emoji: '🥬', desc: '脆藕吸卤汁，微甜', flavor: '咸香', protein: '素食', style: '凉食' },
+  { id: 'sk8', name: '烤肠', short: '烤肠', cat: 'snack', spice: 0, price: 6, emoji: '🌭', desc: '外皮爆开，刷甜辣酱', flavor: '咸香', protein: '猪肉', style: '炸烤' },
+  { id: 'sk9', name: '狼牙土豆', short: '狼牙土豆', cat: 'snack', spice: 2, price: 12, emoji: '🥔', desc: '波浪土豆条，撒辣椒面', flavor: '香辣', protein: '素食', style: '炸烤' },
+
+  /* 甜品饮品 +4 */
+  { id: 'ds7', name: '手打柠檬茶', short: '柠檬茶', cat: 'dessert', spice: 0, price: 12, emoji: '🍋', desc: '手打柠檬，酸得清醒', flavor: '酸甜', protein: '素食', style: '凉食' },
+  { id: 'ds8', name: '生椰拿铁', short: '生椰拿铁', cat: 'dessert', spice: 0, price: 18, emoji: '☕', desc: '椰乳配浓缩，冰的最好喝', flavor: '酸甜', protein: '素食', style: '凉食' },
+  { id: 'ds9', name: '芒果冰沙', short: '芒果冰沙', cat: 'dessert', spice: 0, price: 18, emoji: '🥭', desc: '芒果肉打碎，冰沙很细', flavor: '酸甜', protein: '素食', style: '凉食' },
+  { id: 'ds10', name: '黑糖珍珠鲜奶', short: '黑糖鲜奶', cat: 'dessert', spice: 0, price: 18, emoji: '🥛', desc: '黑糖挂壁，珍珠温热', flavor: '酸甜', protein: '素食', style: '凉食' },
+
 ];
