@@ -12,10 +12,13 @@
   const STORAGE_KEY = 'blindbox.waimai.history.v1';
   const MAX_HISTORY = 200;
   const TWO_PI = Math.PI * 2;
+  const WHEEL_SLICES = 16;
   const INK = '#2b1d12';
   const WHEEL_COLORS = [
-    '#ffd9c2', '#ffe9a8', '#cdebd8', '#cfe4fa',
-    '#f7d4e6', '#e2d4f8', '#ffd2c7', '#d8f0e6',
+    '#ffd9c2', '#ffe9a8', '#f4e0b2', '#e2f0c2',
+    '#cdebd8', '#c9ece0', '#cfe4fa', '#d6ddfb',
+    '#e2d4f8', '#eed8f3', '#f7d4e6', '#ffd6dd',
+    '#ffd2c7', '#f8ddc4', '#ebdfcd', '#d8f0e6',
   ];
 
   const CAT_MAP = Object.fromEntries(CATEGORIES.map((c) => [c.id, c]));
@@ -31,6 +34,9 @@
   const filters = {
     spice: 'any',
     cat: 'any',
+    flavor: 'any',
+    protein: 'any',
+    style: 'any',
     fresh: 'any',
     price: 'any',
     min: 0,
@@ -178,12 +184,13 @@
   /* ------------------------------------------------------------------ */
 
   function buildWheelItems() {
-    return shuffle(
-      CATEGORIES.map((cat) => {
+    return shuffle(CATEGORIES)
+      .slice(0, WHEEL_SLICES)
+      .map((cat) => {
         const pool = DISHES.filter((d) => d.cat === cat.id);
         return pool[Math.floor(Math.random() * pool.length)];
       })
-    );
+      .filter(Boolean);
   }
 
   function drawWheel() {
@@ -255,8 +262,8 @@
 
       /* emoji 保持正向 */
       ctx.save();
-      ctx.translate(cx + Math.cos(angle) * R * 0.43, cy + Math.sin(angle) * R * 0.43);
-      ctx.font = `${Math.round(size * 0.075)}px "Apple Color Emoji", "Segoe UI Emoji", sans-serif`;
+      ctx.translate(cx + Math.cos(angle) * R * 0.465, cy + Math.sin(angle) * R * 0.465);
+      ctx.font = `${Math.round(size * 0.066)}px "Apple Color Emoji", "Segoe UI Emoji", sans-serif`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText(dish.emoji, 0, 0);
@@ -266,7 +273,7 @@
       ctx.save();
       ctx.translate(cx, cy);
       ctx.rotate(angle);
-      const radius = R * 0.735;
+      const radius = R * 0.75;
       if (Math.cos(angle) < 0) {
         ctx.rotate(Math.PI);
         ctx.translate(-radius, 0);
@@ -364,11 +371,14 @@
     return 1 + catN * 0.55 + dishN * 1.15;
   }
 
-  function pickDish({ spice, cat, fresh, min, max, excludeId }) {
+  function pickDish({ spice, cat, flavor, protein, style, fresh, min, max, excludeId }) {
     const spiceMax = spice === 'any' ? 3 : Number(spice);
     const pool = DISHES.filter((d) => {
       if (d.spice > spiceMax) return false;
       if (cat !== 'any' && d.cat !== cat) return false;
+      if (flavor !== 'any' && d.flavor !== flavor) return false;
+      if (protein !== 'any' && d.protein !== protein) return false;
+      if (style !== 'any' && d.style !== style) return false;
       if (d.price < min || d.price > max) return false;
       return true;
     });
@@ -386,6 +396,9 @@
     const dish = pickDish({
       spice: filters.spice,
       cat: filters.cat,
+      flavor: filters.flavor,
+      protein: filters.protein,
+      style: filters.style,
       fresh: filters.fresh,
       min: filters.min,
       max: filters.max,
@@ -426,7 +439,22 @@
         ? '转盘又把它转回来了，看来是真爱。'
         : '转盘已经替你做决定了，反悔就再转一次。';
     }
+    const bits = activeFilterBits();
+    if (bits.length) {
+      return `按「${bits.slice(0, 3).join(' · ')}${bits.length > 3 ? ' 等' : ''}」筛出来，剩下的交给运气。`;
+    }
     return '条件刚好都对上，剩下的交给运气。';
+  }
+
+  function activeFilterBits() {
+    const bits = [];
+    if (filters.spice !== 'any') bits.push(SPICE_LABELS[Number(filters.spice)]);
+    if (filters.cat !== 'any' && CAT_MAP[filters.cat]) bits.push(CAT_MAP[filters.cat].name);
+    if (filters.flavor !== 'any') bits.push(filters.flavor);
+    if (filters.protein !== 'any') bits.push(filters.protein);
+    if (filters.style !== 'any') bits.push(filters.style);
+    if (filters.price !== 'any') bits.push(`¥${filters.min}–${filters.max}`);
+    return bits;
   }
 
   function renderResult(kind, dish, mode) {
@@ -448,6 +476,7 @@
             <div class="dish-meta">
               <span class="pill">${cat.emoji} ${cat.name}</span>
               <span class="pill">${SPICE_LABELS[dish.spice]}</span>
+              <span class="pill">${dish.flavor}</span>
               <span class="pill">¥${dish.price}</span>
               ${freshPill}
             </div>
@@ -805,6 +834,9 @@
   function resetFilters() {
     filters.spice = 'any';
     filters.cat = 'any';
+    filters.flavor = 'any';
+    filters.protein = 'any';
+    filters.style = 'any';
     filters.fresh = 'any';
     filters.price = 'any';
     filters.min = 0;

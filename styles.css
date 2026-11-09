@@ -565,6 +565,32 @@ button { touch-action: manipulation; }
   gap: 7px;
 }
 
+.chips-grouped { display: block; }
+
+.chips-grouped > .chip { margin-bottom: 1px; }
+
+.chips-grouped .chip {
+  padding: 8px 11px;
+  font-size: 12px;
+}
+
+.chip-row { margin-top: 13px; }
+
+.chip-label {
+  display: block;
+  margin-bottom: 7px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  color: #a08a75;
+}
+
+.chip-set {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
 .chip {
   padding: 9px 13px;
   background: rgba(255, 253, 248, 0.9);
@@ -650,10 +676,19 @@ button { touch-action: manipulation; }
 .custom-price input:focus { border-color: var(--tomato); }
 .custom-price .dash { color: var(--muted); font-size: 11px; }
 
+.pick-wrap {
+  position: sticky;
+  bottom: 6px;
+  z-index: 6;
+  padding: 12px 0 10px;
+  margin-top: 4px;
+  background: linear-gradient(to top, rgba(255, 246, 233, 0.97) 58%, rgba(255, 246, 233, 0));
+}
+
 .pick-btn {
   width: 100%;
   padding: 17px 16px;
-  margin-top: 3px;
+  margin-top: 0;
   font-size: 16px;
   letter-spacing: 0.03em;
   border-radius: 16px;

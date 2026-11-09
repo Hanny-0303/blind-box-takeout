@@ -4,13 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>盲盒外卖 · 今天吃什么</title>
-  <meta name="description" content="选择困难症救星：转一次转盘，或者按辣度、分类、新鲜度、价格筛一遍，随机决定今天吃什么。" />
+  <meta name="description" content="选择困难症救星：转一次 16 格转盘，或者按辣度、分类、口味、食材、做法、新鲜度、价格筛一遍，随机决定今天吃什么。" />
   <meta name="theme-color" content="#FFF6E9" />
   <meta name="color-scheme" content="light" />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="盲盒外卖" />
   <meta property="og:title" content="盲盒外卖 · 今天吃什么" />
-  <meta property="og:description" content="转盘 + 精准盲盒，随机决定今天吃什么。纯前端，打开就能用。" />
+  <meta property="og:description" content="21 个分类、129 道菜，转盘 + 精准盲盒，随机决定今天吃什么。纯前端，打开就能用。" />
   <meta property="og:url" content="https://hanny-0303.github.io/blind-box-takeout/" />
   <meta property="og:image" content="https://hanny-0303.github.io/blind-box-takeout/docs/og-cover.jpg" />
   <meta property="og:image:width" content="1200" />
@@ -64,7 +64,7 @@
         </div>
 
         <div class="stage-foot">
-          <p class="hint">转到什么就吃什么，不许反悔</p>
+          <p class="hint">16 道候选，转到了就不许反悔</p>
           <button class="link-btn" id="shuffleWheel" type="button">换一批候选 ↻</button>
         </div>
 
@@ -73,7 +73,7 @@
 
       <!-- ================= 精准盲盒 ================= -->
       <section class="panel" id="panel-filter" role="tabpanel" aria-labelledby="tab-filter" hidden>
-        <p class="panel-lead">把条件摆出来，剩下的交给盲盒。</p>
+        <p class="panel-lead">7 个条件，从 21 个分类、129 道菜里开盲盒。</p>
 
         <div class="filter-block">
           <div class="field-head">
@@ -94,23 +94,118 @@
           <div class="field-head">
             <span class="idx">02</span>
             <span class="field-title">分类</span>
+            <span class="field-note">21 种细分</span>
           </div>
-          <div class="chips" data-group="cat" role="group" aria-label="分类">
+          <div class="chips chips-grouped" data-group="cat" role="group" aria-label="分类">
             <button type="button" class="chip" data-value="any" aria-pressed="true">随便</button>
-            <button type="button" class="chip" data-value="rice" aria-pressed="false">🍚 饭</button>
-            <button type="button" class="chip" data-value="noodle" aria-pressed="false">🍜 面</button>
-            <button type="button" class="chip" data-value="fen" aria-pressed="false">🍲 粉</button>
-            <button type="button" class="chip" data-value="mixian" aria-pressed="false">🥘 米线</button>
-            <button type="button" class="chip" data-value="malatang" aria-pressed="false">🌶️ 麻辣烫</button>
-            <button type="button" class="chip" data-value="burger" aria-pressed="false">🍔 汉堡</button>
-            <button type="button" class="chip" data-value="japanese" aria-pressed="false">🍣 日料</button>
-            <button type="button" class="chip" data-value="light" aria-pressed="false">🥗 轻食</button>
+
+            <div class="chip-row">
+              <span class="chip-label">主食</span>
+              <div class="chip-set">
+                <button type="button" class="chip" data-value="bowl" aria-pressed="false">🍚 盖饭</button>
+                <button type="button" class="chip" data-value="friedrice" aria-pressed="false">🍳 炒饭</button>
+                <button type="button" class="chip" data-value="soupnoodle" aria-pressed="false">🍜 汤面</button>
+                <button type="button" class="chip" data-value="drynoodle" aria-pressed="false">🥢 拌面</button>
+                <button type="button" class="chip" data-value="ricenoodle" aria-pressed="false">🍲 米粉</button>
+                <button type="button" class="chip" data-value="mixian" aria-pressed="false">🥘 米线</button>
+              </div>
+            </div>
+
+            <div class="chip-row">
+              <span class="chip-label">重口</span>
+              <div class="chip-set">
+                <button type="button" class="chip" data-value="malatang" aria-pressed="false">🌶️ 麻辣烫</button>
+                <button type="button" class="chip" data-value="hotpot" aria-pressed="false">🍲 火锅</button>
+                <button type="button" class="chip" data-value="bbq" aria-pressed="false">🍢 烧烤</button>
+                <button type="button" class="chip" data-value="sichuan" aria-pressed="false">🔥 川湘菜</button>
+              </div>
+            </div>
+
+            <div class="chip-row">
+              <span class="chip-label">异国</span>
+              <div class="chip-set">
+                <button type="button" class="chip" data-value="burger" aria-pressed="false">🍔 炸鸡汉堡</button>
+                <button type="button" class="chip" data-value="pizza" aria-pressed="false">🍕 披萨意面</button>
+                <button type="button" class="chip" data-value="japanese" aria-pressed="false">🍣 日料</button>
+                <button type="button" class="chip" data-value="korean" aria-pressed="false">🍙 韩餐</button>
+                <button type="button" class="chip" data-value="sea" aria-pressed="false">🍛 东南亚</button>
+              </div>
+            </div>
+
+            <div class="chip-row">
+              <span class="chip-label">家常</span>
+              <div class="chip-set">
+                <button type="button" class="chip" data-value="cantonese" aria-pressed="false">🍗 粤菜烧腊</button>
+                <button type="button" class="chip" data-value="dumpling" aria-pressed="false">🥟 饺子包子</button>
+                <button type="button" class="chip" data-value="snack" aria-pressed="false">🍢 小吃卤味</button>
+                <button type="button" class="chip" data-value="breakfast" aria-pressed="false">🥣 早餐</button>
+              </div>
+            </div>
+
+            <div class="chip-row">
+              <span class="chip-label">轻盈</span>
+              <div class="chip-set">
+                <button type="button" class="chip" data-value="light" aria-pressed="false">🥗 轻食</button>
+                <button type="button" class="chip" data-value="dessert" aria-pressed="false">🍰 甜品饮品</button>
+              </div>
+            </div>
           </div>
         </div>
 
         <div class="filter-block">
           <div class="field-head">
             <span class="idx">03</span>
+            <span class="field-title">口味</span>
+            <span class="field-note">想吃哪种味道</span>
+          </div>
+          <div class="chips" data-group="flavor" role="group" aria-label="口味">
+            <button type="button" class="chip" data-value="any" aria-pressed="true">随便</button>
+            <button type="button" class="chip" data-value="清淡" aria-pressed="false">清淡</button>
+            <button type="button" class="chip" data-value="咸香" aria-pressed="false">咸香</button>
+            <button type="button" class="chip" data-value="酸甜" aria-pressed="false">酸甜</button>
+            <button type="button" class="chip" data-value="酸爽" aria-pressed="false">酸爽</button>
+            <button type="button" class="chip" data-value="麻辣" aria-pressed="false">麻辣</button>
+            <button type="button" class="chip" data-value="香辣" aria-pressed="false">香辣</button>
+            <button type="button" class="chip" data-value="鲜香" aria-pressed="false">鲜香</button>
+          </div>
+        </div>
+
+        <div class="filter-block">
+          <div class="field-head">
+            <span class="idx">04</span>
+            <span class="field-title">主要食材</span>
+            <span class="field-note">今天想吃什么肉</span>
+          </div>
+          <div class="chips" data-group="protein" role="group" aria-label="主要食材">
+            <button type="button" class="chip" data-value="any" aria-pressed="true">随便</button>
+            <button type="button" class="chip" data-value="鸡肉" aria-pressed="false">鸡肉</button>
+            <button type="button" class="chip" data-value="牛肉" aria-pressed="false">牛肉</button>
+            <button type="button" class="chip" data-value="猪肉" aria-pressed="false">猪肉</button>
+            <button type="button" class="chip" data-value="海鲜" aria-pressed="false">海鲜</button>
+            <button type="button" class="chip" data-value="素食" aria-pressed="false">素食</button>
+          </div>
+        </div>
+
+        <div class="filter-block">
+          <div class="field-head">
+            <span class="idx">05</span>
+            <span class="field-title">做法</span>
+            <span class="field-note">带汤还是干香</span>
+          </div>
+          <div class="chips" data-group="style" role="group" aria-label="做法">
+            <button type="button" class="chip" data-value="any" aria-pressed="true">随便</button>
+            <button type="button" class="chip" data-value="汤汤水水" aria-pressed="false">汤汤水水</button>
+            <button type="button" class="chip" data-value="干香" aria-pressed="false">干香</button>
+            <button type="button" class="chip" data-value="小炒" aria-pressed="false">小炒</button>
+            <button type="button" class="chip" data-value="炸烤" aria-pressed="false">炸烤</button>
+            <button type="button" class="chip" data-value="凉食" aria-pressed="false">凉食</button>
+            <button type="button" class="chip" data-value="蒸煮" aria-pressed="false">蒸煮</button>
+          </div>
+        </div>
+
+        <div class="filter-block">
+          <div class="field-head">
+            <span class="idx">06</span>
             <span class="field-title">新鲜度</span>
             <span class="field-note">按你的点单记录</span>
           </div>
@@ -127,7 +222,7 @@
 
         <div class="filter-block">
           <div class="field-head">
-            <span class="idx">04</span>
+            <span class="idx">07</span>
             <span class="field-title">价格区间</span>
           </div>
           <div class="chips" data-group="price" role="group" aria-label="价格区间">
@@ -153,9 +248,11 @@
           </div>
         </div>
 
-        <button class="btn btn-primary pick-btn" id="pickBtn" type="button">
-          <span aria-hidden="true">🎲</span> 帮我挑一个
-        </button>
+        <div class="pick-wrap">
+          <button class="btn btn-primary pick-btn" id="pickBtn" type="button">
+            <span aria-hidden="true">🎲</span> 帮我挑一个
+          </button>
+        </div>
 
         <div class="result-slot" id="filterResult" aria-live="polite"></div>
       </section>
