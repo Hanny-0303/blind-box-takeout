@@ -774,11 +774,48 @@ button { touch-action: manipulation; }
   gap: 7px;
 }
 
-.cat-note {
-  margin: 9px 0 0;
-  font-size: 10px;
-  line-height: 1.6;
+.subcat-panel {
+  margin-top: 10px;
+  padding: 10px 12px 11px;
+  background: rgba(255, 255, 255, 0.55);
+  border: 1.5px dashed var(--line);
+  border-radius: 14px;
+  animation: priceIn 0.24s ease both;
+}
+
+.subcat-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.subcat-title {
+  font-size: 11px;
+  font-weight: 900;
+  color: var(--ink);
+}
+
+.subcat-hint {
+  margin-left: auto;
+  font-size: 9.5px;
+  color: var(--muted);
+}
+
+#subcatChips .chip {
+  padding: 8px 11px;
+  font-size: 12px;
+}
+
+.chip-count {
+  margin-left: 5px;
+  font-size: 9px;
+  font-weight: 700;
   color: #a08a75;
+}
+
+.chip[aria-pressed="true"] .chip-count {
+  color: rgba(255, 246, 233, 0.72);
 }
 
 .chip {

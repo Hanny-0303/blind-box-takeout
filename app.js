@@ -48,9 +48,13 @@
 
   const CAT_MAP = Object.fromEntries(CATEGORIES.map((c) => [c.id, c]));
   const DISH_MAP = Object.fromEntries(DISHES.map((d) => [d.id, d]));
-  const GROUP_MAP = Object.fromEntries(CATEGORY_GROUPS.map((g) => [g.id, g]));
-  const GROUP_BY_CAT = {};
-  CATEGORY_GROUPS.forEach((g) => g.cats.forEach((catId) => { GROUP_BY_CAT[catId] = g.id; }));
+  const TREE_MAP = Object.fromEntries(CATEGORY_TREE.map((g) => [g.id, g]));
+  const SUBCAT_MAP = {};
+  const GROUP_CATS = {};
+  CATEGORY_TREE.forEach((g) => {
+    GROUP_CATS[g.id] = g.children.flatMap((c) => c.cats);
+    g.children.forEach((c) => { SUBCAT_MAP[c.id] = { ...c, group: g.id }; });
+  });
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   /* ------------------------------------------------------------------ */
@@ -62,6 +66,7 @@
   const filters = {
     spice: 'any',
     cat: 'any',
+    sub: 'any',
     flavor: 'any',
     protein: 'any',
     style: 'any',
@@ -92,6 +97,9 @@
   const shuffleBtn = $('#shuffleWheel');
   const wheelSlot = $('#wheelResult');
   const filterSlot = $('#filterResult');
+  const subcatPanel = $('#subcatPanel');
+  const subcatChips = $('#subcatChips');
+  const subcatLabel = $('#subcatLabel');
   const pickBtn = $('#pickBtn');
   const tabs = $('#tabs');
   const sheet = $('#profileSheet');
@@ -199,7 +207,7 @@
     } else {
       const top = topCategory();
       const topText = top ? `最常吃「${top.name}」` : '还在认识你';
-      tip.innerHTML = `已记录 ${history.length} 次点单，${topText}。想尝新会避开常点的分类，老口味会往熟悉的靠。`;
+      tip.innerHTML = `已记录 ${history.length} 次点单，${topText}。尝鲜会避开常点的分类，念旧会往熟悉的靠。`;
     }
   }
 
@@ -407,11 +415,14 @@
     return 1 + catN * 0.55 + dishN * 1.15;
   }
 
-  function pickDish({ spice, cat, flavor, protein, style, fresh, min, max, excludeId }) {
+  function pickDish({ spice, cat, sub, flavor, protein, style, fresh, min, max, excludeId }) {
     const spiceMax = spice === 'any' ? 3 : Number(spice);
     let pool = DISHES.filter((d) => {
       if (d.spice > spiceMax) return false;
-      if (cat !== 'any' && GROUP_BY_CAT[d.cat] !== cat) return false;
+      if (cat !== 'any') {
+        const allowed = sub !== 'any' && SUBCAT_MAP[sub] ? SUBCAT_MAP[sub].cats : GROUP_CATS[cat];
+        if (!allowed || !allowed.includes(d.cat)) return false;
+      }
       if (flavor !== 'any' && d.flavor !== flavor) return false;
       if (protein !== 'any' && d.protein !== protein) return false;
       if (style !== 'any' && d.style !== style) return false;
@@ -538,6 +549,7 @@
     const dish = pickDish({
       spice: filters.spice,
       cat: filters.cat,
+      sub: filters.sub,
       flavor: filters.flavor,
       protein: filters.protein,
       style: filters.style,
@@ -585,7 +597,7 @@
       return '尽量避开了你常点的口味，换点新鲜感。';
     }
     if (mode === 'old') {
-      if (!total) return '老口味还在养成中，先随便吃，记两次就有偏好了。';
+      if (!total) return '常点的口味还在养成中，先随便吃，记两次就有偏好了。';
       const catN = countCat(dish.cat);
       if (catN >= 2) return `你点过 ${catN} 次「${cat.name}」，老位置给你留着。`;
       return '从你熟悉的口味里挑的，稳稳的幸福。';
@@ -605,7 +617,11 @@
   function activeFilterBits() {
     const bits = [];
     if (filters.spice !== 'any') bits.push(SPICE_LABELS[Number(filters.spice)]);
-    if (filters.cat !== 'any' && GROUP_MAP[filters.cat]) bits.push(GROUP_MAP[filters.cat].name);
+    if (filters.cat !== 'any' && TREE_MAP[filters.cat]) {
+      let label = TREE_MAP[filters.cat].name;
+      if (filters.sub !== 'any' && SUBCAT_MAP[filters.sub]) label += ` · ${SUBCAT_MAP[filters.sub].name}`;
+      bits.push(label);
+    }
     if (filters.flavor !== 'any') bits.push(filters.flavor);
     if (filters.protein !== 'any') bits.push(filters.protein);
     if (filters.style !== 'any') bits.push(filters.style);
@@ -702,7 +718,7 @@
       <article class="empty-card">
         <div class="empty-emoji" aria-hidden="true">🫥</div>
         <p class="empty-title">这个组合太刁钻了</p>
-        <p class="empty-desc">翻遍菜单也没找到完全符合的。把价格或辣度放宽一点，选择会多很多。</p>
+        <p class="empty-desc">口味和辣度可能冲突了，把分类、价格、口味或辣度放宽一点，选择会多很多。</p>
         <button type="button" class="btn btn-small" data-act="reset">重置条件</button>
       </article>`;
     syncFilterDock();
@@ -783,7 +799,7 @@
         <div class="sheet-empty">
           <div class="empty-emoji" aria-hidden="true">🗂️</div>
           <strong>还没有点单记录</strong>
-          <p>每次点「就吃这个」就会自动记一笔。攒几次之后，「想尝试新东西 / 老口味」就会按你的习惯来挑。</p>
+          <p>每次点「就吃这个」就会自动记一笔。攒几次之后，「尝鲜 / 念旧」就会按你的习惯来挑。</p>
           <button type="button" class="btn btn-small" data-act="seed" style="margin-top:14px;">先来 5 笔示例记录</button>
         </div>
         <p class="sheet-note">记录只保存在这台设备的浏览器里</p>`;
@@ -1003,15 +1019,47 @@
     }
   }
 
+  function countCats(cats) {
+    return DISHES.reduce((n, d) => n + (cats.includes(d.cat) ? 1 : 0), 0);
+  }
+
+  function renderSubcats(groupId) {
+    const group = TREE_MAP[groupId];
+    if (!group) {
+      subcatPanel.hidden = true;
+      subcatChips.innerHTML = '';
+      return;
+    }
+
+    const total = countCats(GROUP_CATS[groupId]);
+    const buttons = [
+      `<button type="button" class="chip" data-sub="any" aria-pressed="true">随便<span class="chip-count">${total}</span></button>`,
+    ];
+    group.children.forEach((child) => {
+      const n = countCats(child.cats);
+      buttons.push(
+        `<button type="button" class="chip" data-sub="${child.id}" aria-pressed="false">${child.name}<span class="chip-count">${n}</span></button>`
+      );
+    });
+
+    subcatChips.innerHTML = buttons.join('');
+    subcatLabel.textContent = group.name;
+    subcatPanel.hidden = false;
+  }
+
   function bindFilters() {
-    $$('.chips').forEach((group) => {
+    $$('.chips[data-group]').forEach((group) => {
       group.addEventListener('click', (e) => {
         const chip = e.target.closest('.chip');
         if (!chip || !group.contains(chip)) return;
         const key = group.dataset.group;
         $$('.chip', group).forEach((c) => c.setAttribute('aria-pressed', String(c === chip)));
 
-        if (key === 'price') {
+        if (key === 'cat') {
+          filters.cat = chip.dataset.value;
+          filters.sub = 'any';
+          renderSubcats(filters.cat);
+        } else if (key === 'price') {
           const value = chip.dataset.value;
           if (value === 'custom') {
             customPrice.hidden = false;
@@ -1039,6 +1087,14 @@
     };
     priceMinInput.addEventListener('change', onCustomInput);
     priceMaxInput.addEventListener('change', onCustomInput);
+
+    subcatChips.addEventListener('click', (e) => {
+      const chip = e.target.closest('.chip');
+      if (!chip) return;
+      filters.sub = chip.dataset.sub;
+      $$('.chip', subcatChips).forEach((c) => c.setAttribute('aria-pressed', String(c === chip)));
+      clearFilterResult();
+    });
 
     pickBtn.addEventListener('click', () => pickForMe(false));
 
@@ -1085,6 +1141,7 @@
   function resetFilters() {
     filters.spice = 'any';
     filters.cat = 'any';
+    filters.sub = 'any';
     filters.flavor = 'any';
     filters.protein = 'any';
     filters.style = 'any';
@@ -1099,6 +1156,8 @@
     customPrice.hidden = true;
     priceMinInput.value = '0';
     priceMaxInput.value = '1000';
+    subcatPanel.hidden = true;
+    subcatChips.innerHTML = '';
     clearFilterResult();
     toast('条件已重置');
   }
