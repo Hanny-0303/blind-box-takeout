@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>盲盒外卖 · 今天吃什么</title>
+  <meta name="description" content="选择困难症救星：转一次转盘，或者按辣度、分类、新鲜度、价格筛一遍，随机决定今天吃什么。" />
+  <meta name="theme-color" content="#FFF6E9" />
+  <meta name="color-scheme" content="light" />
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="bg-deco" aria-hidden="true">
+    <span class="deco deco-1">🍜</span>
+    <span class="deco deco-2">🥡</span>
+    <span class="deco deco-3">🥢</span>
+  </div>
+
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">🥡</div>
+        <div>
+          <h1>盲盒外卖</h1>
+          <p id="todayLabel">今天吃什么，交给它</p>
+        </div>
+      </div>
+      <button class="profile-btn" id="profileBtn" type="button" aria-label="打开口味档案">
+        <span class="profile-icon" aria-hidden="true">📋</span>
+        <span class="profile-text">档案</span>
+        <span class="badge" id="historyBadge" hidden>0</span>
+      </button>
+    </header>
+
+    <nav class="tabs" id="tabs" data-active="wheel" aria-label="玩法切换">
+      <span class="thumb" aria-hidden="true"></span>
+      <button class="tab" type="button" role="tab" aria-selected="true" aria-controls="panel-wheel"
+              id="tab-wheel" data-tab="wheel">🎡 转盘</button>
+      <button class="tab" type="button" role="tab" aria-selected="false" aria-controls="panel-filter"
+              id="tab-filter" data-tab="filter">🎲 精准盲盒</button>
+    </nav>
+
+    <main>
+      <!-- ================= 转盘 ================= -->
+      <section class="panel" id="panel-wheel" role="tabpanel" aria-labelledby="tab-wheel">
+        <div class="stage">
+          <div class="orbit" aria-hidden="true"></div>
+          <div class="pointer" aria-hidden="true"><span></span></div>
+          <canvas id="wheel" aria-label="食物转盘"></canvas>
+          <button class="hub" id="spinBtn" type="button">
+            <span class="hub-emoji" aria-hidden="true">🎲</span>
+            <span class="hub-label" id="spinLabel">开转</span>
+          </button>
+        </div>
+
+        <div class="stage-foot">
+          <p class="hint">转到什么就吃什么，不许反悔</p>
+          <button class="link-btn" id="shuffleWheel" type="button">换一批候选 ↻</button>
+        </div>
+
+        <div class="result-slot" id="wheelResult" aria-live="polite"></div>
+      </section>
+
+      <!-- ================= 精准盲盒 ================= -->
+      <section class="panel" id="panel-filter" role="tabpanel" aria-labelledby="tab-filter" hidden>
+        <p class="panel-lead">把条件摆出来，剩下的交给盲盒。</p>
+
+        <div class="filter-block">
+          <div class="field-head">
+            <span class="idx">01</span>
+            <span class="field-title">辣度</span>
+            <span class="field-note">能接受的上限</span>
+          </div>
+          <div class="chips" data-group="spice" role="group" aria-label="辣度">
+            <button type="button" class="chip" data-value="any" aria-pressed="true">随便</button>
+            <button type="button" class="chip" data-value="0" aria-pressed="false">不辣</button>
+            <button type="button" class="chip" data-value="1" aria-pressed="false">微辣</button>
+            <button type="button" class="chip" data-value="2" aria-pressed="false">正常辣</button>
+            <button type="button" class="chip" data-value="3" aria-pressed="false">加辣</button>
+          </div>
+        </div>
+
+        <div class="filter-block">
+          <div class="field-head">
+            <span class="idx">02</span>
+            <span class="field-title">分类</span>
+          </div>
+          <div class="chips" data-group="cat" role="group" aria-label="分类">
+            <button type="button" class="chip" data-value="any" aria-pressed="true">随便</button>
+            <button type="button" class="chip" data-value="rice" aria-pressed="false">🍚 饭</button>
+            <button type="button" class="chip" data-value="noodle" aria-pressed="false">🍜 面</button>
+            <button type="button" class="chip" data-value="fen" aria-pressed="false">🍲 粉</button>
+            <button type="button" class="chip" data-value="mixian" aria-pressed="false">🥘 米线</button>
+            <button type="button" class="chip" data-value="malatang" aria-pressed="false">🌶️ 麻辣烫</button>
+            <button type="button" class="chip" data-value="burger" aria-pressed="false">🍔 汉堡</button>
+            <button type="button" class="chip" data-value="japanese" aria-pressed="false">🍣 日料</button>
+            <button type="button" class="chip" data-value="light" aria-pressed="false">🥗 轻食</button>
+          </div>
+        </div>
+
+        <div class="filter-block">
+          <div class="field-head">
+            <span class="idx">03</span>
+            <span class="field-title">新鲜度</span>
+            <span class="field-note">按你的点单记录</span>
+          </div>
+          <div class="chips" data-group="fresh" role="group" aria-label="新鲜度">
+            <button type="button" class="chip" data-value="any" aria-pressed="true">随便</button>
+            <button type="button" class="chip" data-value="new" aria-pressed="false">✨ 想尝试新东西</button>
+            <button type="button" class="chip" data-value="old" aria-pressed="false">💛 老口味</button>
+          </div>
+          <p class="tip" id="freshTip">
+            <span class="tip-icon" aria-hidden="true">🗂️</span>
+            <span id="freshTipText">还没有点单记录。选完点「就吃这个」就会自动记一笔，攒几次它就开始懂你了。</span>
+          </p>
+        </div>
+
+        <div class="filter-block">
+          <div class="field-head">
+            <span class="idx">04</span>
+            <span class="field-title">价格区间</span>
+          </div>
+          <div class="chips" data-group="price" role="group" aria-label="价格区间">
+            <button type="button" class="chip" data-value="any" data-min="0" data-max="1000" aria-pressed="true">随便</button>
+            <button type="button" class="chip" data-value="0-20" data-min="0" data-max="20" aria-pressed="false">¥20 以内</button>
+            <button type="button" class="chip" data-value="20-40" data-min="20" data-max="40" aria-pressed="false">¥20–40</button>
+            <button type="button" class="chip" data-value="40-60" data-min="40" data-max="60" aria-pressed="false">¥40–60</button>
+            <button type="button" class="chip" data-value="60-100" data-min="60" data-max="100" aria-pressed="false">¥60–100</button>
+            <button type="button" class="chip" data-value="100-1000" data-min="100" data-max="1000" aria-pressed="false">¥100 以上</button>
+            <button type="button" class="chip" data-value="custom" aria-pressed="false">自定义</button>
+          </div>
+
+          <div class="custom-price" id="customPrice" hidden>
+            <label>
+              <span>最低</span>
+              <input type="number" id="priceMin" inputmode="numeric" min="0" max="1000" step="1" value="0" /> 元
+            </label>
+            <span class="dash" aria-hidden="true">—</span>
+            <label>
+              <span>最高</span>
+              <input type="number" id="priceMax" inputmode="numeric" min="0" max="1000" step="1" value="1000" /> 元
+            </label>
+          </div>
+        </div>
+
+        <button class="btn btn-primary pick-btn" id="pickBtn" type="button">
+          <span aria-hidden="true">🎲</span> 帮我挑一个
+        </button>
+
+        <div class="result-slot" id="filterResult" aria-live="polite"></div>
+      </section>
+    </main>
+
+    <footer class="site-foot">
+      记录只存在你的浏览器里 · 换台设备就重新开始
+    </footer>
+  </div>
+
+  <!-- ================= 口味档案 ================= -->
+  <div class="sheet-overlay" id="sheetOverlay" hidden></div>
+  <aside class="sheet" id="profileSheet" aria-label="口味档案" aria-hidden="true">
+    <div class="sheet-grip" aria-hidden="true"></div>
+    <div class="sheet-head">
+      <div>
+        <p class="sheet-kicker">口味档案</p>
+        <h2 id="sheetTitle">你的外卖记忆</h2>
+      </div>
+      <button class="icon-btn" id="closeSheet" type="button" aria-label="关闭档案">✕</button>
+    </div>
+    <div class="sheet-body" id="sheetBody"></div>
+  </aside>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <noscript>
+    <p style="padding:24px;text-align:center;">这个小玩意儿需要开启 JavaScript 才能转起来。</p>
+  </noscript>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
