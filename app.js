@@ -21,6 +21,31 @@
     '#ffd2c7', '#f8ddc4', '#ebdfcd', '#d8f0e6',
   ];
 
+  /* 演示店铺：真实评分需要美团/京东开放平台接口，这里只做交互演示 */
+  const DEMO_PLATFORMS = [
+    {
+      key: 'shangou',
+      name: '美团闪购',
+      url: 'https://shangou.meituan.com/',
+      brands: ['闪购食刻', '即时厨房', '24h 食仓'],
+      base: 4.7,
+    },
+    {
+      key: 'jd',
+      name: '京东外卖',
+      url: 'https://www.jd.com/',
+      brands: ['京选小馆', '京东食堂', '京喜食铺'],
+      base: 4.6,
+    },
+    {
+      key: 'waimai',
+      name: '美团外卖',
+      url: 'https://www.meituan.com/',
+      brands: ['巷口食堂', '饭点研究所', '深夜小馆'],
+      base: 4.5,
+    },
+  ];
+
   const CAT_MAP = Object.fromEntries(CATEGORIES.map((c) => [c.id, c]));
   const DISH_MAP = Object.fromEntries(DISHES.map((d) => [d.id, d]));
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -44,8 +69,8 @@
   };
 
   const results = {
-    wheel: { dish: null, accepted: false },
-    filter: { dish: null, accepted: false },
+    wheel: { dish: null, accepted: false, revealed: true },
+    filter: { dish: null, accepted: false, revealed: false },
   };
 
   const wheelState = {
@@ -392,6 +417,99 @@
     return weightedPick(pool, weights);
   }
 
+  function hashStr(str) {
+    let h = 2166136261;
+    for (let i = 0; i < str.length; i += 1) {
+      h ^= str.charCodeAt(i);
+      h = Math.imul(h, 16777619);
+    }
+    return Math.abs(h);
+  }
+
+  function buildStores(dish) {
+    return DEMO_PLATFORMS.map((p) => {
+      const h = hashStr(`${dish.id}-${p.key}`);
+      return {
+        key: p.key,
+        platform: p.name,
+        url: p.url,
+        brand: p.brands[h % p.brands.length],
+        rating: (p.base + (h % 3) * 0.1).toFixed(1),
+        minutes: 20 + (h % 21),
+        fee: h % 6,
+        minOrder: 15 + (h % 3) * 5,
+      };
+    }).sort((a, b) => Number(b.rating) - Number(a.rating) || a.platform.localeCompare(b.platform));
+  }
+
+  function renderStores(dish) {
+    const stores = buildStores(dish);
+    return `
+      <section class="stores-card" aria-label="附近店铺推荐（演示数据）">
+        <div class="stores-head">
+          <h4>附近能点到</h4>
+          <span class="demo-badge">演示店铺</span>
+        </div>
+        <p class="stores-note">按平台评分从高到低 · 评分与店铺均为演示数据</p>
+        <ul class="store-list">
+          ${stores.map((s, i) => `
+            <li class="store">
+              <span class="store-rank" aria-hidden="true">${i + 1}</span>
+              <div class="store-body">
+                <div class="store-top">
+                  <span class="store-name">${s.brand}</span>
+                  <span class="platform-badge ${s.key}">${s.platform}</span>
+                </div>
+                <p class="store-meta"><strong>${s.rating}</strong> 分 · 约 ${s.minutes} 分钟 · 配送 ¥${s.fee} · 起送 ¥${s.minOrder}</p>
+                <p class="store-dish">招牌：${dish.name}</p>
+              </div>
+              <button type="button" class="store-go" data-store-query="${dish.name}" data-store-url="${s.url}"
+                title="复制菜名并打开平台" aria-label="去${s.platform}搜索${dish.name}">去搜</button>
+            </li>`).join('')}
+        </ul>
+        <p class="stores-foot">本页只做推荐，不代下单、不收集支付信息；实际价格以下单页为准。</p>
+      </section>`;
+  }
+
+  function fallbackCopy(text) {
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.setAttribute('readonly', '');
+      ta.style.position = 'fixed';
+      ta.style.top = '-9999px';
+      document.body.appendChild(ta);
+      ta.select();
+      const ok = document.execCommand('copy');
+      ta.remove();
+      return ok;
+    } catch (err) {
+      return false;
+    }
+  }
+
+  function copyText(text) {
+    if (navigator.clipboard && window.isSecureContext) {
+      return navigator.clipboard.writeText(text).then(() => true).catch(() => fallbackCopy(text));
+    }
+    return Promise.resolve(fallbackCopy(text));
+  }
+
+  function handleStoreSearch(btn) {
+    const query = btn.dataset.storeQuery || '';
+    const url = btn.dataset.storeUrl || '';
+    // 先同步复制，避免新标签页抢走焦点后剪贴板写入失败
+    const copied = fallbackCopy(query);
+    if (url) window.open(url, '_blank', 'noopener');
+    if (copied) {
+      toast(`已复制「${query}」，在平台里粘贴搜索`);
+      return;
+    }
+    copyText(query).then((ok) => {
+      toast(ok ? `已复制「${query}」，在平台里粘贴搜索` : `在平台里搜索「${query}」`);
+    });
+  }
+
   function pickForMe(isReroll) {
     const dish = pickDish({
       spice: filters.spice,
@@ -406,13 +524,13 @@
     });
 
     if (!dish) {
-      results.filter = { dish: null, accepted: false };
+      results.filter = { dish: null, accepted: false, revealed: false };
       renderEmpty();
       return;
     }
 
-    results.filter = { dish, accepted: false };
-    renderResult('filter', dish, filters.fresh);
+    results.filter = { dish, accepted: false, revealed: false };
+    renderSealed();
   }
 
   /* ------------------------------------------------------------------ */
@@ -457,6 +575,39 @@
     return bits;
   }
 
+  function renderSealed() {
+    const bits = activeFilterBits();
+    const desc = bits.length
+      ? `按你选的 ${bits.length} 个条件，从 ${DISHES.length} 道菜里挑了一个。`
+      : `所有条件都随便，从 ${DISHES.length} 道菜里挑了一个。`;
+
+    filterSlot.innerHTML = `
+      <article class="result-card sealed-card">
+        <div class="seal-icon" aria-hidden="true">🎁</div>
+        <h3 class="sealed-title">盲盒已就绪</h3>
+        <p class="sealed-desc">${desc}<br>点开之前，先别偷看。</p>
+        <div class="actions">
+          <button type="button" class="btn btn-primary" data-act="reveal">揭晓答案</button>
+          <button type="button" class="btn btn-ghost" data-act="reroll">换一个</button>
+        </div>
+      </article>`;
+
+    syncFilterDock();
+    const card = filterSlot.firstElementChild;
+    requestAnimationFrame(() => {
+      if (card && card.getBoundingClientRect().bottom > window.innerHeight - 10) {
+        card.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'end' });
+      }
+    });
+  }
+
+  function revealFilter() {
+    const res = results.filter;
+    if (!res.dish || res.revealed) return;
+    res.revealed = true;
+    renderResult('filter', res.dish, filters.fresh);
+  }
+
   function renderResult(kind, dish, mode) {
     const slot = kind === 'wheel' ? wheelSlot : filterSlot;
     const cat = CAT_MAP[dish.cat];
@@ -487,16 +638,24 @@
           <button type="button" class="btn btn-primary" data-act="accept">就吃这个</button>
           <button type="button" class="btn btn-ghost" data-act="reroll">${kind === 'wheel' ? '再转一次' : '换一个'}</button>
         </div>
-      </article>`;
+      </article>
+      ${renderStores(dish)}`;
+
+    if (kind === 'filter') syncFilterDock();
 
     const card = slot.firstElementChild;
     requestAnimationFrame(() => {
       if (!card) return;
-      const rect = card.getBoundingClientRect();
-      if (rect.bottom > window.innerHeight - 10) {
-        card.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'end' });
+      // 给下面的店铺列表留出一点可视空间，顺便提示还有内容
+      const overflow = card.getBoundingClientRect().bottom - (window.innerHeight - 118);
+      if (overflow > 0) {
+        window.scrollBy({ top: overflow, behavior: reduceMotion ? 'auto' : 'smooth' });
       }
     });
+  }
+
+  function syncFilterDock() {
+    document.body.classList.toggle('filter-has-result', filterSlot.children.length > 0);
   }
 
   function renderEmpty() {
@@ -507,6 +666,7 @@
         <p class="empty-desc">翻遍菜单也没找到完全符合的。把价格或辣度放宽一点，选择会多很多。</p>
         <button type="button" class="btn btn-small" data-act="reset">重置条件</button>
       </article>`;
+    syncFilterDock();
     filterSlot.firstElementChild.scrollIntoView({
       behavior: reduceMotion ? 'auto' : 'smooth',
       block: 'end',
@@ -746,6 +906,11 @@
     shuffleBtn.addEventListener('click', resetWheel);
 
     wheelSlot.addEventListener('click', (e) => {
+      const storeBtn = e.target.closest('[data-store-query]');
+      if (storeBtn) {
+        handleStoreSearch(storeBtn);
+        return;
+      }
       const btn = e.target.closest('button[data-act]');
       if (!btn) return;
       if (btn.dataset.act === 'accept') acceptDish('wheel', btn);
@@ -800,9 +965,15 @@
     pickBtn.addEventListener('click', () => pickForMe(false));
 
     filterSlot.addEventListener('click', (e) => {
+      const storeBtn = e.target.closest('[data-store-query]');
+      if (storeBtn) {
+        handleStoreSearch(storeBtn);
+        return;
+      }
       const btn = e.target.closest('button[data-act]');
       if (!btn) return;
       if (btn.dataset.act === 'accept') acceptDish('filter', btn);
+      if (btn.dataset.act === 'reveal') revealFilter();
       if (btn.dataset.act === 'reroll') pickForMe(true);
       if (btn.dataset.act === 'reset') resetFilters();
     });
@@ -827,8 +998,9 @@
   }
 
   function clearFilterResult() {
-    results.filter = { dish: null, accepted: false };
+    results.filter = { dish: null, accepted: false, revealed: false };
     filterSlot.innerHTML = '';
+    syncFilterDock();
   }
 
   function resetFilters() {
